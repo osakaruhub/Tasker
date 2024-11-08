@@ -1,0 +1,17 @@
+@startuml
+
+skinparam Shadowing false
+
+participant Client as C
+participant Server as S
+participant Login as auth
+
+C -> auth: Authentication Request (login())
+auth -> Server: formatted Authentication Request (login())
+S --> C: retrieve Latest Calendars
+C ->> S: request sync
+C ->> S: request saving current Calendar to Server
+S ->> C: close connection
+
+'!include ../../plantuml-styles/ae-copyright-footer.txt
+@enduml
