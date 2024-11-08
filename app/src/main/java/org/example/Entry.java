@@ -1,3 +1,5 @@
+package org.example;
+ 
 public class Entry {
   static int ID;
   String title;
