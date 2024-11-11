@@ -1,21 +1,22 @@
 package org.example;
+import java.util.List;
  
 public class Entry {
   static int ID;
   String title;
   double from;
-  double until;
-  Arraylist<String> tags;
+  double to;
+  List<String> tags;
 
-  public Entry(String title, double from, double until) {
+  public Entry(String title, double from, double to) {
     ID += 1;
     this.title = title;
     this.from = from;
-    this.until = until;
+    this.to = to;
   }
 
   @Override
   public String toString() {
-    return ID + ":" + title + "|" + from + "-" + until; 
+    return ID + ":" + title + "|" + from + "-" + to; 
   }
 }
