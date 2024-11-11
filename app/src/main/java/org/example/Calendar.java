@@ -1,21 +1,27 @@
 package org.example;
+import java.awt.List;
 import java.util.ArrayList;
 
 public class Calendar extends ArrayList<Entry> {
     private static String ID = 0;
     String name;
+    List<String> tags;
 
     public Calendar(String name, List<String> tags) {
         super();
         ID += 1;
         this.name = name;
+        this.tags = tags;
     }
 
+  //returns a String of all Events a Calendar.
   @Override
   public toString() {
-    for (Entry entry :entries) {
+    String string;
+    for (Entry entry : entries) {
       string += entry.toString + "\n";
     }
+    return string;
   }
     // find Entry by String. Must be its full name.
     // returns the id of String or -1 if nothing.

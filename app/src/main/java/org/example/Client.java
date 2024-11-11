@@ -1,7 +1,5 @@
 package org.example;
 
-import java.sql.Date;
-
 public class Client {
   private static final int port = 1234;
   private static final String host = "localhost";
@@ -28,6 +26,7 @@ public class Client {
         //} catch (IOException) {}
         return true;
     }
+    //TODO: data transmission between sockets
     public Boolean addEntry(String name, int from, int to, List<String> tags) {
         //socket.write(name+";"+from+";"+to+";"+String.join("%", tags)+"/n");
         return true;

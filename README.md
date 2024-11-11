@@ -3,9 +3,13 @@ Tasker is a small application for managing events.
 The task (no pun intended), is to have a no dependancy, no bullshit task manager, whether you're using a GUI or creep behind a terminal.
 This application come with the Server itself, and a graphical interface (and tui), and therefore need a local server Already
 Roadmap:
+- [] list events
 - [] add events
 - [] tag support
 - [] create a timetable
+- [] add a GUI
+- [] add tests for faster debugging
+
 
  # contribution
  contribution is always helpful, whether you're just catch bugs or add to the code.
