@@ -14,15 +14,25 @@ public class Calendar extends ArrayList<Entry> {
         this.tags = tags;
     }
 
-  //returns a String of all Events a Calendar.
-  @Override
-  public toString() {
-    String string;
-    for (Entry entry : entries) {
-      string += entry.toString + "\n";
+    //returns a String of all Events a Calendar.
+    @Override
+    public String toString() {
+        String string;
+        for (Entry entry : this) {
+            string += this.name + "|";
+            string += entry.toString();
+        }
+        return string;
     }
-    return string;
-  }
+
+    public toStringFormat() {
+        String string;
+        for (Entry entry : this) {
+            string += this.name + ":\n\n";
+            string += entry.toStringFormat() + "\n";
+        }
+        return string;
+    }
     // find Entry by String. Must be its full name.
     // returns the id of String or -1 if nothing.
     public Entry findEntryIdByString(String filter) {
