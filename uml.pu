@@ -5,6 +5,7 @@ skinparam Shadowing false
 participant Client as C
 participant Server as S
 participant Login as auth
+participant GUI as G
 
 C -> auth: Authentication Request (login())
 auth -> Server: formatted Authentication Request (login())
@@ -12,6 +13,10 @@ S --> C: retrieve Latest Calendars
 C ->> S: request sync
 C ->> S: request saving current Calendar to Server
 S ->> C: close connection
+S ->> S: kick connection
+S ->> S: listen for commands
+G --> G: create GUI
+G --> C: send user input for managing Events
 
 '!include ../../plantuml-styles/ae-copyright-footer.txt
 @enduml
