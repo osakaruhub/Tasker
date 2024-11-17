@@ -1,0 +1,10 @@
+##### 
+Heutzutage gibt es viele Office Suites, die Kalender und Termin-manager besitzen. Jedoch sind viele entweder teuer oder rauben deine Freiheit, oder haben eine schlechte UX. Mit Tasker haben wir uns entschieden, eine 
+
+##### Wer wir sind
+Wir sind Lukas Walter, Felix Walter und Oskar Stuewe.
+wir sind eine Gruppe von Hobbyisten, die Software entwickelt, die FOSS-konform sind. Unser Fokus ist der Endnutzer, darum stellen wir unsere Software frei, nicht vom Preis, sondern Freiheit, die Software zu aendern und freizugeben.
+
+##### Wie es funktioniert
+Der Client gibt eine Anfrage an, um die neusten Kalender zu bekommen (erst noch Alle Kalender, dann nur Aenderungen, per hash). Der Server schickt ein langes String-packet mit alle Termine, die dann im Client wieder aufgebaut werden.
+Auch kann man auswaehlen ob man es automatisch synchronisiert haben moechte.
