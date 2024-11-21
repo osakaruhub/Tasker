@@ -30,7 +30,7 @@ java {
 }
 
 application {
-    mainClass = 'org.example.App'
+    mainClass = 'org.example.KalenderApp'
 }
 
 task runServer(type: JavaExec) {
