@@ -9,13 +9,14 @@ public class event {
     String person;
     double from;
     double to;
-    List<String> tags;
+    String tag;
 
-    public Event(String title, String person, double from, double to) {
+    public Event(String title, String person, double from, double to, String tag) {
         ID += 1;
         this.title = title;
         this.from = from;
         this.to = to;
+        this.tag = tag;
     }
 
     //returns a summary of the Event.

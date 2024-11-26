@@ -1,7 +1,7 @@
 package main.java.org.example;
 
 /**
- * Requests
+ * TaskerProtocol
  */ 
 // Statuscodes for the protocol. Use these to send preapplied or custom messages to the client. theres probably a better way, i just found it to work.
 public enum StatusCode {

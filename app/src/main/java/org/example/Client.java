@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.TaskerProtocol;
+
 
 public class Client {
     private static final int port = 1234;
