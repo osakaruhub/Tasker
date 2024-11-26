@@ -3,6 +3,8 @@ package org.example;
 import socketio.ServerSocket;
 import socketio.Socket;
 import java.util.Scanner;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 public class Server {
@@ -10,7 +12,7 @@ public class Server {
     private static final String host = "localhost";
     //private ArrayList<Clients> clients;
     private ServerSocket sSocket;
-    private ArrayList<Socket> Csockets;
+    private ArrayList<java.net.Socket> Csockets;
     private static Boolean close = false;
 
     public Server(){
@@ -49,6 +51,12 @@ public class Server {
         }
     }
 
+    public void broadcast(Request req, String content) {
+        for (Socket socket : Csockets) {
+            socket.write(req + " " + content +";");
+        }
+    }
+
     public void close() {
         close = true;
         try {
@@ -64,8 +72,20 @@ public class Server {
         }
         
     }
-    public void listClients() {}
-    public void kick(String client) {}
+
+    public void listClients() {
+        String str;
+        for (Socket socket : Csockets) {
+            str += socket.getInetAddress() + "\n";
+        }
+        System.out.println(str);
+    }
+
+    public void kick(int id) throws IOException {
+        if (id < Csockets.size() - 1) {
+            Csockets.get(id).close();
+        }
+    }
 
     public static void main(String[] args) {
         new Thread(Server::listenForCommands).start();

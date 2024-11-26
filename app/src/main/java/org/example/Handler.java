@@ -1,19 +1,23 @@
 package main.java.org.example;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Handler
  */
 public class Handler {
-    private HashMap<Entry> entries;
-    
+    static private HashMap<Entry> entries;
+    static private List<String> tags;
 
-    public Entry getEntry(int id) {
+    //add tags or entries here
+    static {
+    }
+
+    static public Entry getEntry(int id) {
         return this.entries.getOrDefault(id, null);
     }
-  
-    public int addEntry(String title, String name, int from, int to) {
+    static public int addEntry(String title, String name, int from, int to) {
         statusCode = client.request(ADD + " " + title + "," + name + "," + from + "," + to);
         if (statusCode.getCode() == StatusCode.OK) {
             this.entries.add(new Entry(title,person,from,to));
@@ -22,13 +26,26 @@ public class Handler {
         return statusCode;
     }
 
-    public Boolean deleteEntry(int id) {
-        statuscode = client.request(DELETE + calendar+":"+event+";");
+    static public List<String> getTags() {
+        return Handler.tags;
+    }
+
+    static public String getTagsCLI() {
+        String str;
+        for (int i = 0;i<tags.size();i++) {
+            str += i + " - " + tags.get(i) + "\n";
+        }
+        str += "custom";
+        return str;
+    }
+
+    static public Boolean deleteEntry(int id) {
+        int statuscode = Client.request(DELETE + calendar+":"+event+";");
         return statusCode;
     }
       
-  public void sync() {
-        client.request(SYNC);
+    static public void sync() {
+        Client.request(SYNC);
         //TODO: sync method
     }
 }
