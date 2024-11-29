@@ -14,13 +14,14 @@ public class Handler {
     static {
     }
 
-    static public Entry getEntry(int id) {
-        return this.entries.getOrDefault(id, null);
+    static public Event getEvent(int id) {
+        return entries.getOrDefault(id, null);
     }
-    static public int addEntry(String title, String name, int from, int to) {
-        statusCode = client.request(ADD + " " + title + "," + name + "," + from + "," + to);
+    static public int addEvent(String title, String name, int from, int to, String tag) {
+        request = new Request.ADD();
+        statusCode = client.request(ADD + " " + title + "," + name + "," + from + "," + to + "," + tag);
         if (statusCode.getCode() == StatusCode.OK) {
-            this.entries.add(new Entry(title,person,from,to));
+            entries.add(new Event(title,person,from,to,tag));
             return OK;
         }
         return statusCode;
@@ -40,12 +41,15 @@ public class Handler {
     }
 
     static public Boolean deleteEntry(int id) {
-        int statuscode = Client.request(DELETE + calendar+":"+event+";");
-        return statusCode;
+        StatusCode statuscode = Client.request(DELETE + calendar+":"+event+";");
+        return statusCode == StatusCode.OK;
     }
       
     static public void sync() {
-        Client.request(SYNC);
+        StatusCode = Client.request(SYNC);
+        if (statusCode = StatusCode.OK) {
+
+        }
         //TODO: sync method
     }
 }
