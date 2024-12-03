@@ -21,6 +21,8 @@ dependencies {
 
     // This dependency is used by the application.
     implementation libs.guava
+
+    implementation files('lib/Serial-1.2.jar')
 }
 
 java {
@@ -30,19 +32,19 @@ java {
 }
 
 application {
-    mainClass = 'mtd.Tasker.Client'
+    mainClass = 'mtd.Tasker.KalenderApp'
 }
 
 task runServer(type: JavaExec) {
     group = 'application'
     description = 'Runs the server application'
-    main = 'com.example.Server'
+    main = 'mtd.tasker.Server'
     classpath = sourceSets.main.runtimeClasspath
 }
 
 task runClient(type: JavaExec) {
     group = 'application'
     description = 'Runs the client application'
-    main = 'com.example.Client'
+    main = 'mtd.tasker.Client'
     classpath = sourceSets.main.runtimeClasspath
 }

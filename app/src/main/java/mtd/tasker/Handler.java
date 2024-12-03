@@ -1,5 +1,7 @@
-package main.java.org.example;
+package mtd.tasker;
 
+import mtd.tasker.protocol.Request;
+import mtd.tasker.protocol.StatusCode;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,9 +19,9 @@ public class Handler {
     static public Event getEvent(int id) {
         return entries.getOrDefault(id, null);
     }
-    static public int addEvent(String title, String name, int from, int to, String tag) {
-        request = new Request.ADD();
-        statusCode = client.request(ADD + " " + title + "," + name + "," + from + "," + to + "," + tag);
+    static public int addEvent(String title, String person, int from, int to, String tag) {
+        Request request = new Request.ADD(title, person, from, to, tag);
+        statusCode = client.request(request.toString());
         if (statusCode.getCode() == StatusCode.OK) {
             entries.add(new Event(title,person,from,to,tag));
             return OK;
@@ -41,13 +43,14 @@ public class Handler {
     }
 
     static public Boolean deleteEntry(int id) {
-        StatusCode statuscode = Client.request(DELETE + calendar+":"+event+";");
+        Request = Request.DELETE;
+        StatusCode statuscode = Client.request(Request.DELETE + id +";");
         return statusCode == StatusCode.OK;
     }
       
     static public void sync() {
         StatusCode = Client.request(SYNC);
-        if (statusCode = StatusCode.OK) {
+        if (statusCode == StatusCode.OK) {
 
         }
         //TODO: sync method

@@ -1,4 +1,4 @@
-package main.java.org.example;
+package mtd.tasker.protocol;
 
 /**
  * TaskerProtocol
@@ -36,8 +36,51 @@ public enum StatusCode {
     }
 }
 
+/**
+ * Response - class for handling Responses
+ *
+ * @param a the first integer to add
+ * @param b the second integer to add
+ * @return the sum of a and b
+ */
+public class Response {
+ /*
+   Creates the OK Response with content 
+ * @param code the StatusCode OK
+ * @param the content the server reponds with
+ */
+    public Response(StatusCode.OK code, String msg) {
+        this.code = code;
+    }
+
+ /*
+   Creates a Response with the normal StatusCode
+ * @param code the StatusCode
+ * */
+    public Response(StatusCode code) {
+        this.code = code;
+        this.msg = code.getMessage();
+    }
+
+ /*
+   gets the content inside the Response
+ * @return code the StatusCode
+ * */
+    public String getContent() {
+        return this.msg;
+    }
+
+ /*
+   gets the StatusCode for the Response
+ * @return code the StatusCode
+ * */
+    public StatusCode getStatusCode() {
+        return this.code;
+    }
+}
+
 // Requestcodes for the protocol. Use these to send requests to the server, which decodes to what the client wants.
-public enum Request {
+public enum RequestCode {
     ADD("200"),
     DELETE("201"),
     GET("202"),
@@ -45,7 +88,7 @@ public enum Request {
 
     private final String code;
 
-    Request(String code) {
+    RequestCode(String code) {
         this.code = code;
     }
 
@@ -53,4 +96,8 @@ public enum Request {
     public String toString() {
         return this.code;
     }
+}
+
+public class Request {
+    public Request(RequestCode code, String msg) {}
 }

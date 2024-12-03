@@ -1,12 +1,13 @@
-package mtd.Tasker;
+package mtd.tasker;
 
-import org.example.TaskerProtocol;
-
+import socketio.Socket;
+import java.io.IOException;
 
 public class Client {
+
     private static final int port = 1234;
     private static final String host = "localhost";
-    private Socket socket; 
+    private static Socket socket; 
 
     public Client() {
         do {
@@ -27,11 +28,8 @@ public class Client {
         } catch (IOException e) {}
     }
 
-    public StatusCode request(String string) {
-        socket.write(String);
-
-        // how do you wait until server sends anwser in TCP?
-        while (socket.read() != ACK);
+    static public StatusCode request(String string) {
+        socket.write(string);
         String status = socket.read();
         return new StatusCode(Integer.parseInt(status.substring(0, 3)), status.substring(4));
     }
@@ -42,7 +40,7 @@ public class Client {
             socket.close();
         } catch (IOException e) {
             System.out.println("Konnte nicht die Verbindung schliessen");
-            System.exit();
+            System.exit(0);
         }
     }
 
