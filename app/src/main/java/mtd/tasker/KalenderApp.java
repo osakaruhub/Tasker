@@ -2,21 +2,24 @@ package mtd.tasker;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
+import java.time.Year;
 
 public class KalenderApp {
 
     private static final String[] Wochentage = {
         "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"
     };
-
-    private static int monat = Calendar.JANUARY; 
-    private static int jahr = 2024;  
+    private static Calendar test;
+    private static Calendar aktuellesDatum;
     private static Object[][] tagesDaten = new Object[6][7];  
 
     public KalenderApp(){
-        monat = Calendar.getInstance().get(Calendar.MONTH);
+       
+        aktuellesDatum = Calendar.getInstance();
+        test = aktuellesDatum;
     }
 
     public void createKalenderUI() {
@@ -41,11 +44,15 @@ public class KalenderApp {
         JButton prevMonthButton = new JButton("<< Monat zurück");
         prevMonthButton.setBounds(50, 30, 150, 30);
         prevMonthButton.addActionListener(e -> {
-            if (monat > 0) {
-                monat--;
-            } else {
-                monat = Calendar.DECEMBER;
-                jahr--;
+            Calendar temp = (Calendar) test.clone();
+            temp.set(Calendar.MONTH, -1);
+            System.out.println("Temp Datum: " + temp.getTime());
+            System.out.println("Test Datum: " + test.getTime());
+            System.out.println("aktuelles Datum: " + aktuellesDatum.getTime());
+            System.out.println(aktuellesDatum.before(temp));
+            if(aktuellesDatum.before(temp)){
+                test.add(Calendar.MONTH, -1);
+                updateKalender(monatJahrLabel);
             }
             updateKalender(monatJahrLabel);
         });
@@ -53,12 +60,8 @@ public class KalenderApp {
         JButton nextMonthButton = new JButton("Monat vor >>");
         nextMonthButton.setBounds(500, 30, 150, 30);
         nextMonthButton.addActionListener(e -> {
-            if (monat < Calendar.DECEMBER) {
-                monat++;
-            } else {
-                monat = Calendar.JANUARY;
-                jahr++;
-            }
+            test.add(Calendar.MONTH, +1);
+            
             updateKalender(monatJahrLabel);
         });
 
@@ -75,12 +78,10 @@ public class KalenderApp {
             @Override
             public void mouseClicked(MouseEvent e) {
                
-                System.out.println(table.rowAtPoint(e.getPoint()));
-                System.out.println(table.columnAtPoint(e.getPoint()));
                 int row = table.rowAtPoint(e.getPoint());
                 int column = table.columnAtPoint(e.getPoint());
                
-                
+               
             }
         });
         
@@ -96,38 +97,37 @@ public class KalenderApp {
        
         updateKalender(monatJahrLabel);
     }
-
+    
     public static void updateKalender(JLabel monatJahrLabel) {
       
         updateMonatJahrLabel(monatJahrLabel);
-
-        int firstDayOfMonth = getFirstDayOfMonth();
-        int daysInMonth = getDaysInMonth();
-
-       
     }
+    
 
+    
     // Monat und Jahr Label aktualisieren
     private static void updateMonatJahrLabel(JLabel monatJahrLabel) {
-        String monatName = new SimpleDateFormat("MMMM").format(new GregorianCalendar(jahr, monat, 1).getTime());
-        monatJahrLabel.setText(monatName + " " + jahr);
+        String monatName = new SimpleDateFormat("MMMM").format(new GregorianCalendar(test.get(Calendar.YEAR), test.get(Calendar.MONTH), 1).getTime());
+        monatJahrLabel.setText(monatName + " " + test.get(Calendar.YEAR));
     }
 
     // Erster Wochentag des Monats
     private static int getFirstDayOfMonth() {
-        Calendar cal = new GregorianCalendar(jahr, monat, 1);
+        Calendar cal = new GregorianCalendar(test.get(Calendar.YEAR), test.get(Calendar.MONTH), 1);
         return cal.get(Calendar.DAY_OF_WEEK) - 1;  // Wochentag als Index (0 = Montag, 6 = Sonntag)
     }
 
     // Anzahl der Tage im Monat
     private static int getDaysInMonth() {
-        Calendar cal = new GregorianCalendar(jahr, monat, 1);
+        Calendar cal = new GregorianCalendar(test.get(Calendar.YEAR), test.get(Calendar.MONTH), 1);
         return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
-
+    
     public static void main(String[] args) {
        
         KalenderApp kalenderApp = new KalenderApp();
         kalenderApp.createKalenderUI();
     }
+
+    
 }
