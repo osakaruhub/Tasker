@@ -1,5 +1,7 @@
 package mtd.tasker;
 
+
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -12,18 +14,19 @@ public class KalenderApp {
     private static final String[] Wochentage = {
             "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"
     };
-    private static Calendar test;
-    private static Calendar aktuellesDatum;
-    private static Object[][] tagesDaten = new Object[6][7];
+    private static Calendar currentGUIDate;
+    private static Calendar currentDate;
+    private static Object[][] dayData = new Object[6][7];
     private JTable table = null;
 
+
     public KalenderApp(){
-        aktuellesDatum = Calendar.getInstance();
-        aktuellesDatum.clear(Calendar.MILLISECOND);
-        aktuellesDatum.clear(Calendar.SECOND);
-        aktuellesDatum.clear(Calendar.MINUTE);
-        aktuellesDatum.clear(Calendar.HOUR);
-        test = Calendar.getInstance();
+        currentDate = Calendar.getInstance();
+        currentDate.clear(Calendar.MILLISECOND);
+        currentDate.clear(Calendar.SECOND);
+        currentDate.clear(Calendar.MINUTE);
+        currentDate.clear(Calendar.HOUR);
+        currentGUIDate = Calendar.getInstance();
     }
 
     public void createKalenderUI() {
@@ -48,17 +51,18 @@ public class KalenderApp {
         JButton prevMonthButton = new JButton("<< Monat zurück");
         prevMonthButton.setBounds(50, 30, 150, 30);
         prevMonthButton.addActionListener(e -> {
-            Calendar temp = (Calendar) test.clone();
+            Calendar temp = (Calendar) currentGUIDate.clone();
             temp.add(Calendar.MONTH, -1);
             System.out.println("Temp Datum: " + temp.getTime());
-            System.out.println("Test Datum: " + test.getTime());
+            System.out.println("Test Datum: " + currentGUIDate.getTime());
             System.out.println("aktuelles Datum: " + Calendar.getInstance().getTime());
-            System.out.println(temp.before(aktuellesDatum));
-            if(!temp.before(aktuellesDatum)){
+            System.out.println(temp.before(currentDate));
+            if(!temp.before(currentDate)){
                 System.out.println("Changed test date");
-                test.add(Calendar.MONTH, -1);
+                currentGUIDate.add(Calendar.MONTH, -1);
 
-                updateKalender(monatJahrLabel);
+                updateMonatJahrLabel(monatJahrLabel);
+                updateKalanderTable();
             }
 
         });
@@ -66,13 +70,14 @@ public class KalenderApp {
         JButton nextMonthButton = new JButton("Monat vor >>");
         nextMonthButton.setBounds(500, 30, 150, 30);
         nextMonthButton.addActionListener(e -> {
-            test.add(Calendar.MONTH, +1);
+            currentGUIDate.add(Calendar.MONTH, +1);
 
-            updateKalender(monatJahrLabel);
+            updateMonatJahrLabel(monatJahrLabel);
+            updateKalanderTable();
         });
 
-        table = new JTable(tagesDaten, Wochentage);
-        table.setFont(new Font("Arial", Font.PLAIN, 18));
+        table = new JTable(dayData, Wochentage);
+        table.setFont(new Font("Arial", Font.PLAIN, 10));
         table.setRowHeight(60);
         table.setEnabled(false);
 
@@ -88,8 +93,15 @@ public class KalenderApp {
 
                 int row = table.rowAtPoint(e.getPoint());
                 int column = table.columnAtPoint(e.getPoint());
-
-
+                System.out.println("column: " + column + " row: " + row + " Value: " + table.getValueAt(row, column));
+                JPopupMenu jPopupMenu = new JPopupMenu();
+                jPopupMenu.add( "" +table.getValueAt(row, column));
+                JButton closeButton = new JButton("Close");
+                closeButton.addActionListener(event ->{
+                    jPopupMenu.setVisible(false);
+                });
+                jPopupMenu.add(closeButton);
+                jPopupMenu.setVisible(true);
             }
         });
 
@@ -103,41 +115,70 @@ public class KalenderApp {
         frame.setVisible(true);
 
         updateKalanderTable();
-        updateKalender(monatJahrLabel);
+        updateMonatJahrLabel(monatJahrLabel);
     }
 
     public void updateKalanderTable() {
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            for (int j = 0; j < table.getRowCount(); j++) {
-                if(i == 0){
-                   j = getFirstDayOfMonth();
+        Calendar date = (Calendar) currentGUIDate.clone();
+        date.set(Calendar.DAY_OF_MONTH, 1);
+        boolean firstWeak = false;
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        System.out.println(sdf.format(date.getTime()));
+        // req data for the current month
+        System.out.println(getFirstDayOfMonth(date));
+        for (int i = 0; i < table.getColumnCount()-1; i++) {
+            int startJ = (i == 0) ? getFirstDayOfMonth(date) : 0;
+            for (int j = startJ; j < 7; j++) {
+                table.setValueAt("",i,j);
+                if (currentDate.get(Calendar.MONTH) != date.get(Calendar.MONTH) ){
+                    break;
+                }
+                else{
+
+                    table.setValueAt(sdf.format(date.getTime()),i,j);
+
+                    date.add(Calendar.DAY_OF_MONTH, 1);
                 }
             }
 
         }
     }
 
-    public static void updateKalender(JLabel monatJahrLabel) {
-        updateMonatJahrLabel(monatJahrLabel);
-    }
-
-
 
     // Monat und Jahr Label aktualisieren
     private static void updateMonatJahrLabel(JLabel monatJahrLabel) {
-        String monatName = new SimpleDateFormat("MMMM").format(new GregorianCalendar(test.get(Calendar.YEAR), test.get(Calendar.MONTH), 1).getTime());
-        monatJahrLabel.setText(monatName + " " + test.get(Calendar.YEAR));
+        String monatName = new SimpleDateFormat("MMMM").format(new GregorianCalendar(currentGUIDate.get(Calendar.YEAR), currentGUIDate.get(Calendar.MONTH), 1).getTime());
+        monatJahrLabel.setText(monatName + " " + currentGUIDate.get(Calendar.YEAR));
     }
 
     // Erster Wochentag des Monats
-    private static int getFirstDayOfMonth() {
-        Calendar cal = new GregorianCalendar(test.get(Calendar.YEAR), test.get(Calendar.MONTH), 1);
-        return cal.get(Calendar.DAY_OF_WEEK) - 1;  // Wochentag als Index (0 = Montag, 6 = Sonntag)
+    private static int getFirstDayOfMonth(Calendar calendar) {
+        Calendar cal = new GregorianCalendar(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), 1);
+        switch(cal.get(Calendar.DAY_OF_WEEK)){
+            case 1:
+                return 6; // Sonntag
+            case 2:
+                return 0; // Montag
+            case 3:
+                return 1; // Dienstag
+            case 4:
+                return 2;   //Mittwoch
+            case 5:
+                return 3; //Donnerstag
+            case 6:
+                return 4; // Freitag
+            case 7:
+                return 5; // Samstag
+            default:
+                return -99;
+        }
+       // Wochentag als Index (1 = Sonntag, 7 = Samstag)
+
     }
 
     // Anzahl der Tage im Monat
     private static int getDaysInMonth() {
-        Calendar cal = new GregorianCalendar(test.get(Calendar.YEAR), test.get(Calendar.MONTH), 1);
+        Calendar cal = new GregorianCalendar(currentGUIDate.get(Calendar.YEAR), currentGUIDate.get(Calendar.MONTH), 1);
         return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 
@@ -149,3 +190,4 @@ public class KalenderApp {
 
 
 }
+
