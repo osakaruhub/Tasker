@@ -3,18 +3,26 @@ package mtd.tasker;
 import socketio.Socket;
 import java.io.IOException;
 
+import mtd.tasker.protocol.Response;
+
 public class Client {
 
-    private static final int port = 1234;
-    private static final String host = "localhost";
+    private static final int PORT = 1234;
+    private static final String HOST = "localhost";
     private static Socket socket; 
 
     public Client() {
         do {
-        try {
-            socket = new Socket(host, port);
-        } catch (IOException e) {
-                System.out.println("couldnt create Socket, trying in 5 seconds...");
+            try {
+                socket = new Socket(HOST, PORT);
+                while (!verbinden()) {
+                    System.out.println("couldnt connect to " + HOST + ":" + HOST + "\ntrying again in 5 seconds...");
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ee) {}
+                }
+            } catch (IOException e) {
+                System.out.println("couldnt create Socket, trying again in 5 seconds...");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException ee) {}
@@ -23,15 +31,14 @@ public class Client {
     }
 
     public Boolean verbinden() {
-        try {
         return socket.connect();
-        } catch (IOException e) {}
     }
 
-    static public StatusCode request(String string) {
+    static public Response request(String string) {
         socket.write(string);
-        String status = socket.read();
-        return new StatusCode(Integer.parseInt(status.substring(0, 3)), status.substring(4));
+        String status = socket.readLine();
+        String[] c = status.split("");
+        return new Response(c[0],c[1]);
     }
 
     public void close() {
@@ -40,7 +47,7 @@ public class Client {
             socket.close();
         } catch (IOException e) {
             System.out.println("Konnte nicht die Verbindung schliessen");
-            System.exit(0);
+            System.exit(1);
         }
     }
 
@@ -49,6 +56,6 @@ public class Client {
         Client c = new Client();
         c.verbinden();
         while(true);
-        c.close();
+        //c.close();
     }
 }

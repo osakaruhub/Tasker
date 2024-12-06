@@ -1,11 +1,10 @@
 package mtd.tasker;
 
-import java.util.List;
+import java.time.Instant;
  
 public class Event {
-    private int timeAdded;
+    private Instant timeAdded;
     static int ID = -1;
-    private int id;
     private String title;
     private String person;
     private double from;
@@ -13,8 +12,7 @@ public class Event {
     private String tag;
 
     public Event(String title, String person, double from, double to, String tag) {
-        this.timeAdded = java.time.Instant();
-        this.id = ID++;
+        this.timeAdded = Instant.now();
         this.title = title;
         this.person = person;
         this.from = from;
@@ -25,7 +23,7 @@ public class Event {
     //returns a summary of the Event.
     @Override
     public String toString() {
-        return ID + ";" + title + ";" + from + ";" + to + ":" + "(" + person + "," + tag + ")";
+        return title + ":" + from + ":" + to + ":" + ":" + person + ":" + tag;
     }
 
     public String toStringFormat() {
