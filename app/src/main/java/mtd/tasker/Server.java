@@ -4,15 +4,19 @@ import socketio.ServerSocket;
 import socketio.Socket;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.xml.transform.SourceLocator;
+
 import mtd.tasker.protocol.*;
+import mtd.tasker.Serialisation;
 
 public class Server {
     private static final int port = 1234;
     private static final String host = "localhost";
-    private static String ADMIN_PASS = "test";
-    private static ServerSocket sSocket;
-    private static ArrayList<Clientp> clients = new ArrayList<>();
-    private static Boolean close = false;
+    public static String ADMIN_PASS = "test";
+    public static ServerSocket sSocket;
+    public static ArrayList<Clientp> clients = new ArrayList<>();
+    public static Boolean close = false;
 
     public Server() {
         while (true) {
@@ -53,59 +57,83 @@ class ClientThread implements Runnable {
 
     public void run() {
         while (running) {
-            String msg = socket.readLine();
-            if (msg == null) {
+            byte[] msg = null;
+            try {
+            int msgLen = socket.read();
+            if (msgLen == -1) {
                 continue;
             }
-            for (String request: msg.split(";")) { 
-              handleRequest(request.split(" "));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+                try {
+                handleRequest((Request) Serialisation.deserialize(msg));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
         }
     }
 
-    void handleRequest(Request request) {
+    // BUG: too many try catches to bother, dont wanna do it rn
+    // also maybe put refactor more into Serverhandle, looks hideous rn
+    void handleRequest(Request request) throws IOException {
         // TODO: Handle Client Requests
+        byte[] response;
         switch (request.getRequestCode()) {
             case RequestCode.ADD:
-            socket.write(addEvent(request.getContent())?StatusCode.OK:StatusCode.INTERNAL_SERVER_ERROR);
+            response = Serialisation.serialize(addEvent(request.getContent())?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR));
+            socket.write(response, response.length);
                 break;
-            case RequestCode.REMOVE:
+            case RequestCode.DELETE:
+            Response resp;
             try {
-                Response response = remove(request.getContent());
-            } catch (Exception e) {status = new Response(StatusCode.NOT_FOUND);}
-            write(status);
+                resp = remove(request.getContent());
+            } catch (Exception e) {resp = new Response(StatusCode.NOT_FOUND);}
+            response = Serialisation.serialize(resp); 
+            socket.write(response, response.length);
             break;
             case RequestCode.SYNC:
-            sync();
-            break;
+                response = Serialisation.serialize(sync());
+                socket.write(response, response.length);
+                break;
             case RequestCode.GET:
             String msg = request.getContent();
             get();
             break;
             case RequestCode.SU:
-            if (request.getContent().equals(ADMIN_PASS)) {
+            if (ServerHandle.su(request.getContent())) {
+                response = Serialisation.serialize(new Response(StatusCode.OK));
+                socket.write(response, response.length);
                 admin = true;
             } else {
-                socket.write(new Status(PERMISSION_ERROR));
+                response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
+                socket.write(response, response.length);
             }
             case RequestCode.LIST:
             if (admin) {
-                socket.write(new Status(OK, listClients()));
-            } else {
-                socket.write(new Status(PERMISSION_ERROR));
-            }
-            break;
-            case RequestCode.KICK:
-            if (admin) {
-                try {
-                kick();
-                    socket.write(StatusCode.OK);
-                } catch (Exception e) {
-                    socket.write(StatusCode.INTERNAL_SERVER_ERROR);
+                response = Serialisation.serialize(new Response(StatusCode.OK, listClients()));
+                socket.write(response, response.length);
+                } else {
+                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
+                    socket.write(response, response.length);
                 }
-            }
-            break;
+                break;
+            case RequestCode.KICK:
+                if (admin) {
+                    try {
+                        if (kick(Integer.parseInt(request.getContent()))) {
+                        response = Serialisation.serialize(new Response(StatusCode.OK, listClients()));
+                            socket.write(response, response.length);
+                        } else {}
+                    } catch (Exception e) {
+                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
+                        socket.write(response, response.length);
+                    }
+                }
+                break;
             default:
+            response = Serialisation.serialize(new Response(StatusCode.BAD_REQUEST));
+            socket.write(response, response.length);
             break;
         }
     }
@@ -114,34 +142,51 @@ class ClientThread implements Runnable {
         return true;
     }
 
+    public Boolean get() {return true;}
+
     private Boolean addEvent(String content) {
-        event = content.split(":");
+        String[] event = content.split(":");
         try {
-            events.add(new Event(event[0], event[1], Double.parseDouble(event[2]), Double.parseDouble(event[3]), event[4]));
-            multicast(StatusCode.ADD + content, id);
+            ServerHandle.events.add(new Event(event[0], event[1], Double.parseDouble(event[2]), Double.parseDouble(event[3]), event[4]));
+            multicast(new Request(RequestCode.ADD, content));
         } catch (NumberFormatException e) {
             return false;
         }
         return true;
     }
 
-    private void kick(int id) throws IOException {
-        if (id < Csockets.size() - 1 && id >= 0) {
-            Csockets.get(id).close();
+    private Boolean kick(int id) throws IOException {
+        if (id < ServerHandle.events.size() - 1 && id >= 0) {
+            Server.clients.get(id).socket.close();
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private Status remove(String event) throws NumberFormatException{
+    private Response remove(String event) throws NumberFormatException{
         int id = Integer.parseInt(event);
-        if (id >= 0 && Integer.parseInt(event) < handler.events.size()) {
-            events.remove(id);
+        if (id >= 0 && Integer.parseInt(event) < ServerHandle.events.size()) {
+            ServerHandle.events.remove(id);
             return new Response(StatusCode.OK);
+        } else {
+            return new Response(StatusCode.NOT_FOUND);
         }
     }
 
-    private void multicast(Request req, String content) {
-        for (Socket socket : Csockets) {
-            socket.write(req + " " + content + ";");
+    private void multicast(Request req) {
+        byte[] request = null;
+        try {
+        request = Serialisation.serialize(req);
+        } catch (Exception e) {
+        }
+        for (Clientp client : Server.clients) {
+            try {
+            client.socket.write(request, request.length);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("couldnt send to client: " + client.id);
+            }
         }
     }
 
@@ -151,18 +196,18 @@ class ClientThread implements Runnable {
 
     @Override
     public String toString() {
-        return id + " - " + ip;
+        return id + "";
     }
 
     void close() {
         try {
             System.out.println("closing all clients...");
-            for (Socket socket : Csockets) {
-                socket.close();
+            for (Clientp client : Server.clients) {
+                client.socket.close();
             }
             System.out.println("closing the server...");
-            sSocket.close();
-            close = true;
+            Server.sSocket.close();
+            Server.close = true;
         } catch (Exception e) {
             System.err.println("couldn't close safely");
             System.exit(0);

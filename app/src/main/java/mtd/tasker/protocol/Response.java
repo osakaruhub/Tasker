@@ -4,10 +4,6 @@ import mtd.tasker.protocol.StatusCode;
 
 /**
  * Response - class for handling Responses
- *
- * @param a the first integer to add
- * @param b the second integer to add
- * @return the sum of a and b
  */
 public class Response {
     private StatusCode code;
@@ -35,15 +31,23 @@ public class Response {
 
  /*
    gets the content inside the Response
- * @return code the StatusCode
+   @return content the content inside the Response
  * */
     public String getContent() {
         return this.content;
     }
 
  /*
+   gets the content inside the Response
+   @return code the StatusCode instance
+ * */
+    public StatusCode getStatusCode() {
+        return this.code;
+    }
+
+ /*
    gets the StatusCode for the Response
- * @return code the StatusCode
+ * @return code the code of the StatusCode
  * */
     public String getCode() {
         return this.code.toString();

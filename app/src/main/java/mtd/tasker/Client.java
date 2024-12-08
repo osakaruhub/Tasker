@@ -4,6 +4,7 @@ import socketio.Socket;
 import java.io.IOException;
 
 import mtd.tasker.protocol.Response;
+import mtd.tasker.protocol.Request;
 
 public class Client {
 
@@ -34,11 +35,20 @@ public class Client {
         return socket.connect();
     }
 
-    static public Response request(String string) {
-        socket.write(string);
-        String status = socket.readLine();
-        String[] c = status.split("");
-        return new Response(c[0],c[1]);
+    static public Response request(Request request) {
+        try {
+            byte[] req = Serialisation.serialize(request);
+            socket.write(req, req.length);
+            byte[] resp = null;
+            int respLen = socket.read(resp, socket.dataAvailable());
+            if ( respLen == -1) {
+                return null;
+            }
+            return (Response) Serialisation.deserialize(resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void close() {

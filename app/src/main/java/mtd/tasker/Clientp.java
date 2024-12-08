@@ -4,7 +4,7 @@ import socketio.Socket;
 
 public class Clientp {
     static int ID = 0;
-    private int id;
+    public int id;
     public Socket socket;
     public Thread thread;
 

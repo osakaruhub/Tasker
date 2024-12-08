@@ -7,7 +7,8 @@ public enum RequestCode {
     GET("202"),
     SYNC("203"),
     LIST("204"),
-    KICK("205");
+    KICK("205"),
+    SU("206");
 
     private final String code;
 

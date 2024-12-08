@@ -30,12 +30,12 @@ public class Handler {
 
     static public int addEvent(String title, String person, double from, double to, String tag) {
         Request request = new Request(RequestCode.ADD, new Event(title, person, from, to, tag).toString());
-        Response response = Client.request(request.toString());
+        Response response = Client.request(request);
         if (response.getCode() == StatusCode.OK.toString()) {
             entries.add(new Event(title,person,from,to,tag));
             return OK;
         }
-        return Response.getCode();
+        return (int) response.getCode();
     }
 
     static public List<String> getTags() {
@@ -43,7 +43,7 @@ public class Handler {
     }
 
     static public String getTagsCLI() {
-        String str;
+        String str = "";
         int i = 0;
         for (;i<tags.size();i++) {
             str += i + " - " + tags.get(i) + "\n";
@@ -53,14 +53,12 @@ public class Handler {
     }
 
     static public Boolean deleteEntry(int id) {
-        Request = Request.DELETE;
-        Response response = Client.request(new Request(RequestCode.DELETE, id + "").toString());
-        return response.getStatusCode == StatusCode.OK;
+        return Client.request(new Request(RequestCode.DELETE, id + "")).getStatusCode() == StatusCode.OK;
     }
       
     static public void sync() {
-        StatusCode = Client.request(new Request(RequestCode.SYNC));
-        if (statusCode == StatusCode.OK) {
+        Response response = Client.request(new Request(RequestCode.SYNC));
+        if (response.getStatusCode() == StatusCode.OK) {
 
         }
         //TODO: sync method
