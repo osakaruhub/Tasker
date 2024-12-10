@@ -8,11 +8,32 @@ import mtd.tasker.protocol.Request;
 
 public class Client {
 
-    private static final int PORT = 1234;
-    private static final String HOST = "localhost";
+    private static int DEF_PORT = 1234;
+    private static String DEF_HOST = "localhost";
+    private String host;
+    private int port;
     private static Socket socket; 
 
+    /**
+     * create Client with default values
+     */
     public Client() {
+        this(DEF_HOST, DEF_PORT);
+    }
+
+    /**
+     * create the Client with custom adress
+     *
+     * @param port 
+     * @param host 
+     */
+    public Client(String host, int port) {
+        this.host = host;
+        this.port = port;
+        connect();
+    }
+
+    public void connect() {
         do {
             try {
                 socket = new Socket(host, port);

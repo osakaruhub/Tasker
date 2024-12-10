@@ -23,3 +23,8 @@ We are a small voluntary group of students that try to make software more free. 
 
 For the group:
 Our Build software is Gradle, and our project lies in 'app'. Therein lies a build config file and the source code for our project. Please also put diagrams (doesnt just have to be PlantUML, pictures are also ok) for our project to visualise the implementation.
+what we are still missing:
+Connection between Handler and GUI
+Database
+Login (seems far-fetched)
+extra UI (Terminal, commandline)

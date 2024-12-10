@@ -8,7 +8,8 @@ import mtd.tasker.protocol.StatusCode;
 public class Response {
     private StatusCode code;
     private String content;
- /*
+
+ /**
    Creates the OK Response with content 
  * @param code the StatusCode OK
  * @param the content the server reponds with
@@ -20,7 +21,7 @@ public class Response {
         this.code = code;
     }
 
- /*
+ /**
    Creates a Response with the normal StatusCode
  * @param code the StatusCode
  * */
@@ -29,7 +30,7 @@ public class Response {
         this.content = code.getMessage();
     }
 
- /*
+ /**
    gets the content inside the Response
    @return content the content inside the Response
  * */
@@ -37,7 +38,7 @@ public class Response {
         return this.content;
     }
 
- /*
+ /**
    gets the content inside the Response
    @return code the StatusCode instance
  * */
@@ -45,7 +46,7 @@ public class Response {
         return this.code;
     }
 
- /*
+ /**
    gets the StatusCode for the Response
  * @return code the code of the StatusCode
  * */

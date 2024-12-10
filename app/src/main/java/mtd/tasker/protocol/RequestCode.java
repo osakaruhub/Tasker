@@ -1,6 +1,5 @@
 package mtd.tasker.protocol;
 
-// Requestcodes for the protocol. Use these to send requests to the server, which decodes to what the client wants.
 public enum RequestCode {
     ADD("200"),
     DELETE("201"),

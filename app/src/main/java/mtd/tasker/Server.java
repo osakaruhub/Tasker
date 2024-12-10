@@ -5,8 +5,6 @@ import socketio.Socket;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.xml.transform.SourceLocator;
-
 import mtd.tasker.protocol.*;
 import mtd.tasker.Serialisation;
 
@@ -59,18 +57,22 @@ class ClientThread implements Runnable {
         while (running) {
             byte[] msg = null;
             try {
-            int msgLen = socket.read();
-            if (msgLen == -1) {
-                continue;
-            }
+                int len = socket.dataAvailable();
+                if (len == 0) {
+                    continue;
+                }
+                int msgLen = socket.read(msg, len);
+                if (msgLen == -1) {
+                    continue;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-                try {
+            try {
                 handleRequest((Request) Serialisation.deserialize(msg));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

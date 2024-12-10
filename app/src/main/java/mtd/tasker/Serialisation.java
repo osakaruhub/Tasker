@@ -9,6 +9,13 @@ import java.lang.RuntimeException;
 import java.io.IOException;
 
 public class Serialisation {
+/**
+ * serialize an object for sending.
+ *
+ * @param object the Object to be serialized
+ * @return byte[] the Serialized version 
+ * @throws IOException
+ */
 public static byte[] serialize(Object object) throws IOException {
     try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
          ObjectOutputStream out = new ObjectOutputStream(bos)) {
@@ -17,6 +24,13 @@ public static byte[] serialize(Object object) throws IOException {
     } 
 }
 
+/**
+ * deserialize an object to cast it
+ *
+ * @param bytes 
+ * @return Object the abstract Object of the bytes given
+ * @throws throw new RuntimeException(ex); 
+ */
 public static Object deserialize(byte[] bytes) {
     ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 

@@ -2,6 +2,10 @@ package mtd.tasker.protocol;
 
 import mtd.tasker.protocol.RequestCode;
 
+/**
+ * Class for Request for the socket. A Request consists of a RequestCode and its content.
+ *
+ */
 public class Request {
     private RequestCode code;
     private String content;
