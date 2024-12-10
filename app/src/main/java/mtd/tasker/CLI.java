@@ -1,33 +1,36 @@
-package main.java.org.example;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+package mtd.tasker;
+
+import java.util.Scanner;
+
+import mtd.tasker.protocol.Request;
+import socketio.Socket;
+
 /**
- * CLI
- * a terminal User Interface (TUI) for the Tasker application
+ * access the server right from your terminal! this is a small program that sends commands straight to the server, but it still has to conform to the TaskerProtocol
+ *
  */
 public class CLI {
-    public void printCal() {}
-    public void addCal() {
-        System.out.println("state your name:");
-        name = sc.next();
-        String timePattern = "(\\d{2}:\\d{2}) - (\\d{2}:\\d{2})";
-        do {
-            System.out.println("when? hh:mm - hh:mm");
-            time = sc.next();
-            Pattern compiledPattern = Pattern.compile(timePattern);
-            Matcher matcher = compiledPattern.matcher(input);
-            if (!matcher.matches()) {
-                System.out.println("does not match pattern");
-            }
-        } while (!matcher.matches());
-        String startTime = matcher.group(1);
-        String endTime = matcher.group(2);
-        System.out.println("tick purpose:\n" + listTags());
+    static Client client = new Client();
+    static private final String stopMessage = "exit";
 
-    }
-        public String listTags() {
-            str += Handler.getTagsCLI();
-        return str;
+    public static void main(String[] args) {
+        Client c;
+        if (args != null && args[0] != null && args[1] != null) {
+            c = new Client(args[0], Integer.parseInt(args[1]));
         }
+        commands();
+    }
 
+    public static void commands() {
+        Scanner sc = new Scanner(System.in);
+        String cmd;
+        do {
+            cmd = sc.nextLine();
+            try {
+                System.out.println(Client.request(Serialisation.serialize(new Request(StatusCode.fromCode(),cmd))));
+            } catch (Exception e) {
+                //TODO: handle exception
+            }
+        } while (!cmd.equals(stopMessage));
+    }
 }

@@ -15,18 +15,22 @@ public class Client {
     public Client() {
         do {
             try {
-                socket = new Socket(HOST, PORT);
+                socket = new Socket(host, port);
                 while (!verbinden()) {
-                    System.out.println("couldnt connect to " + HOST + ":" + HOST + "\ntrying again in 5 seconds...");
+                    System.out.println("couldnt connect to " + this.host + ":" + this.port + "\ntrying again in 5 seconds...");
                     try {
                         Thread.sleep(5000);
-                    } catch (InterruptedException ee) {}
+                    } catch (InterruptedException ee) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             } catch (IOException e) {
                 System.out.println("couldnt create Socket, trying again in 5 seconds...");
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException ee) {}
+                } catch (InterruptedException ee) {
+                    Thread.currentThread().interrupt();
+                }
             }
         } while (socket == null);
     }
@@ -35,6 +39,12 @@ public class Client {
         return socket.connect();
     }
 
+    /**
+     * Send a Request to the Server
+     *
+     * @param request the request that is being sent
+     * @return Response - the Response from the Server
+     */
     static public Response request(Request request) {
         try {
             byte[] req = Serialisation.serialize(request);
@@ -51,6 +61,10 @@ public class Client {
         }
     }
 
+    /**
+     * close the connection
+     * note that it will close the JVM if the close fails
+     */
     public void close() {
         System.out.println("Verbindung schliessen...");
         try {
@@ -61,7 +75,7 @@ public class Client {
         }
     }
 
-    // NOTE: solange GUI nicht vollständig ist, ist der main in Client
+    // NOTE: solange GUI nicht vollständig ist, ist der main in Client, EDIT: habe auch Klassen TUI fuer 'Terminal User Interface' und CLI fuer die Kommandozeile erstellt, sodass sie temporaer zum Main gehoren
     public static void main(String[] args) {
         Client c = new Client();
         c.verbinden();
