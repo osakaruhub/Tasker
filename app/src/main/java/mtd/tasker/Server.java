@@ -28,6 +28,7 @@ public class Server {
                     System.out.println("New client connected!");
                     clientThread.start();
                     clients.add(new Clientp(socket, clientThread)); 
+                    socket.write("connected!\n");
                 }
             } catch (IOException e) {
                 System.out.println("creating socket at " + host + ":" + port + " failed. trying again in 5 seconds...");
@@ -58,7 +59,7 @@ class ClientThread implements Runnable {
             byte[] msg = null;
             try {
                 int len = socket.dataAvailable();
-                if (len == 0) {
+                if (len <= 0) {
                     continue;
                 }
                 int msgLen = socket.read(msg, len);
@@ -66,11 +67,12 @@ class ClientThread implements Runnable {
                     continue;
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Client " + id + " disconnected!: " + e.getMessage());
+                running = false;
             }
             try {
                 handleRequest((Request) Serialisation.deserialize(msg));
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -133,6 +135,16 @@ class ClientThread implements Runnable {
                     }
                 }
                 break;
+            case RequestCode.EXIT:
+                socket.close();
+                running = false;
+            case RequestCode.CLOSE:
+                if (!admin) {
+                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
+                } else {
+                multicast(new Request(RequestCode.EXIT));
+                close();
+            }
             default:
             response = Serialisation.serialize(new Response(StatusCode.BAD_REQUEST));
             socket.write(response, response.length);
@@ -196,12 +208,7 @@ class ClientThread implements Runnable {
         return "stub";
     } 
 
-    @Override
-    public String toString() {
-        return id + "";
-    }
-
-    void close() {
+    private void close() {
         try {
             System.out.println("closing all clients...");
             for (Clientp client : Server.clients) {

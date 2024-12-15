@@ -1,0 +1,13 @@
+@startuml
+class Server as S
+class Client as C
+class Clientp as CP
+class Handler as H
+enum StatusCode as SC
+enum RequestCode as RC
+class Response as RP
+class Response as RQ
+
+S "*" *-- C: contains
+
+@enduml

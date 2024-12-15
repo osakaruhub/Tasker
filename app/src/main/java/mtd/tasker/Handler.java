@@ -4,7 +4,6 @@ import mtd.tasker.protocol.Request;
 import mtd.tasker.protocol.RequestCode;
 import mtd.tasker.protocol.StatusCode;
 import mtd.tasker.protocol.Response;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -35,7 +34,7 @@ public class Handler {
             entries.add(new Event(title,person,from,to,tag));
             return OK;
         }
-        return (int) response.getCode();
+        return Integer.parseInt(response.getCode());
     }
 
     static public List<String> getTags() {

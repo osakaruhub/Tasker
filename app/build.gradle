@@ -32,7 +32,7 @@ java {
 }
 
 application {
-    mainClass = 'mtd.Tasker.KalenderApp'
+    mainClass = 'mtd.tasker.KalenderApp'
 }
 
 task runServer(type: JavaExec) {
@@ -46,5 +46,12 @@ task runClient(type: JavaExec) {
     group = 'application'
     description = 'Runs the client application'
     main = 'mtd.tasker.Client'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task runCLI(type: JavaExec) {
+    group = 'application'
+    description = 'Runs the client application'
+    main = 'mtd.tasker.CLI'
     classpath = sourceSets.main.runtimeClasspath
 }

@@ -1,0 +1,165 @@
+@startuml
+class ClientThread as CT{
+socket : Socket
+{static} ID : int
+- id : int
+- running : Boolean
+- admin : Boolean
++ ClientThread(socket : Socket)
++ run() : void
+handleRequest(request : Request) : void
++ sync() : Boolean
++ get() : Boolean
+- addEvent(content : String) : Boolean
+- kick(id : int) : Boolean
+- remove(event : String) : Response
+- multicast(req : Request) : void
+listClients() : String
+- close() : void
+}
+ClientThread ..|> Runnable
+
+class TUI as T{
+}
+
+class Client as C{
+- {static} DEF_PORT : int
+- {static} DEF_HOST : String
+- host : String
+- port : int
+- {static} socket : Socket
++ Client()
++ Client(host : String, port : int)
++ connect() : void
++ verbinden() : Boolean
++ {static} request(request : Request) : Response
++ close() : void
++ {static} main(args : String[]) : void
+}
+
+class Clientp as Cp{
+{static} ID : int
++ id : int
++ socket : Socket
++ thread : Thread
++ Clientp(s : Socket, t : Thread)
+}
+
+class ServerHandle{
++ {static} events : ArrayList<Event>
++ {static} su(pass : String) : Boolean
+}
+
+class Event as E{
+- timeAdded : Instant
+{static} ID : int
+- title : String
+- person : String
+- from : double
+- to : double
+- tag : String
++ Event(title : String, person : String, from : double, to : double, tag : String)
++ Event(title : String, person : String, from : double, to : double)
++ toString() : String
++ toStringFormat() : String
+}
+
+class Server as S{
+- {static} port : int
+- {static} host : String
++ {static} ADMIN_PASS : String
++ {static} sSocket : ServerSocket
++ {static} clients : ArrayList<Clientp>
++ {static} close : Boolean
++ Server()
++ {static} main(args : String[]) : void
+}
+
+class Handler as H{
+- {static} entries : ArrayList<Event>
+- {static} tags : List<String>
+- {static} OK : int
++ {static} getEvents() : Event[]
++ {static} getEvent(id : int) : Event
++ {static} addEvent(title : String, person : String, from : double, to : double, tag : String) : int
++ {static} getTags() : List<String>
++ {static} getTagsCLI() : String
++ {static} deleteEntry(id : int) : Boolean
++ {static} sync() : void
+}
+
+class Serialisation as Serial{
+note left : (de-)converts objects to Bytes for transmission
++ {static} serialize(object : Object) : byte[]
++ {static} deserialize(bytes : byte[]) : Object
+}
+
+class CLI{
+- {static} c : Client
+- {static} stopMessage : String
++ CLI()
++ {static} main(args : String[]) : void
++ {static} commands() : void
+}
+
+class Response{
+- code : StatusCode
+- content : String
++ Response(code : StatusCode, msg : String)
++ Response(code : StatusCode)
+}
+
+class KalenderApp as Cal{
+- {static} Wochentage : String[]
+- {static} currentGUIDate : Calendar
+- {static} currentDate : Calendar
+- {static} dayData : Object[][]
+- table : JTable
++ KalenderApp()
++ createKalenderUI() : void
++ updateKalanderTable() : void
+- {static} updateMonatJahrLabel(monatJahrLabel : JLabel) : void
+- {static} getFirstDayOfMonth(calendar : Calendar) : int
+- {static} getDaysInMonth() : int
++ {static} main(args : String[]) : void
+}
+
+CLI*--"{static} c" C
+
+enum RequestCode reqEnum{
+ADD
+DELETE
+GET
+SYNC
+LIST
+KICK
+SU
+EXIT
+CLOSE
+- code : int
++ fromCode() : RequestCode
++ toString() : String
+}
+
+class Request{
+- code : RequestCode
+- content : String
++ Request(code : RequestCode, content : String)
++ Request(code : RequestCode)
++ toString() : String
+}
+Request*--"- code" RequestCode
+
+enum StatusCode{
+OK
+NOT_FOUND
+SERVER_ERROR
+BAD_REQUEST
+PERMISSION_ERROR
+- code : int
++ fromCode() : RequestCode
++ toString() : String
+}
+Response*--"- code" StatusCode
+
+@enduml

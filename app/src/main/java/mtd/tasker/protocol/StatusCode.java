@@ -1,6 +1,5 @@
 package mtd.tasker.protocol;
 
-// Statuscodes for the protocol. Use these to send preapplied or custom messages to the client. theres probably a better way, i just found it to work.
 public enum StatusCode {
     OK("1", "Ok"),
     NOT_FOUND("404", "Not Found"),
@@ -16,18 +15,25 @@ public enum StatusCode {
         this.msg = msg;
     }
 
-    StatusCode(int code)
-
     @Override
     public String toString() {
         return this.code + " " + this.msg;
     }
 
-    public int getCode() {
-        return code;
+    static public StatusCode fromCode(String code) {
+        for (StatusCode stat : StatusCode.values()) {
+            if (stat.getCode().equals(code)) {
+                return stat;
+            }
+        }
+        return null;
+    }
+
+    public String getCode() {
+        return this.code;
     }
 
     public String getMessage() {
-        return message;
+        return this.msg;
     }
 }
