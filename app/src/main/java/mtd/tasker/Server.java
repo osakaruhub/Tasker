@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import mtd.tasker.protocol.*;
-import mtd.tasker.Serialisation;
 
 public class Server {
     private static final int port = 1234;
@@ -70,8 +69,10 @@ class ClientThread implements Runnable {
                 System.out.println("Client " + id + " disconnected!: " + e.getMessage());
                 running = false;
             }
+            Request req = (Request) Serialisation.deserialize(msg);
+            System.out.println("command gotten: " + req.toString());
             try {
-                handleRequest((Request) Serialisation.deserialize(msg));
+                handleRequest(req);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -85,11 +86,13 @@ class ClientThread implements Runnable {
         byte[] response;
         switch (request.getRequestCode()) {
             case RequestCode.ADD:
+            // NOTE: change this when changing to a database
             response = Serialisation.serialize(addEvent(request.getContent())?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR));
             socket.write(response, response.length);
                 break;
             case RequestCode.DELETE:
             Response resp;
+            // NOTE: change this when changing to a database
             try {
                 resp = remove(request.getContent());
             } catch (Exception e) {resp = new Response(StatusCode.NOT_FOUND);}
@@ -102,7 +105,17 @@ class ClientThread implements Runnable {
                 break;
             case RequestCode.GET:
             String msg = request.getContent();
-            get();
+            String cmd[] = msg.split(";");
+            // NOTE: change this when changing to a database
+            switch (cmd[0]) {
+                case "person":
+                response = Serialisation.serialize(ServerHandle.getByName(cmd[1]));
+                    break;
+
+                default:
+                    break;
+            }
+            socket.write(response, response.length);
             break;
             case RequestCode.SU:
             if (ServerHandle.su(request.getContent())) {
@@ -114,6 +127,7 @@ class ClientThread implements Runnable {
                 socket.write(response, response.length);
             }
             case RequestCode.LIST:
+            // NOTE: change this when changing to a database
             if (admin) {
                 response = Serialisation.serialize(new Response(StatusCode.OK, listClients()));
                 socket.write(response, response.length);
@@ -155,8 +169,6 @@ class ClientThread implements Runnable {
     public Boolean sync() {
         return true;
     }
-
-    public Boolean get() {return true;}
 
     private Boolean addEvent(String content) {
         String[] event = content.split(":");
@@ -223,3 +235,23 @@ class ClientThread implements Runnable {
         }
     }
 }
+
+class HeartbeatChecker implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Thread.sleep(1000); // Check every second
+                    checkThreads();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+
+        private void checkThreads() {
+            // Iterate through the list and remove dead threads
+            Server.clients.removeIf(client -> !client.thread.isAlive());
+        }
+    }

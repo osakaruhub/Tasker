@@ -23,7 +23,7 @@ public enum RequestCode {
                 return req;
             }
         }
-        return null;
+        throw new InvalidCommandException(code);
     }
 
     @Override

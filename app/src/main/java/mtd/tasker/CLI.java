@@ -1,9 +1,9 @@
 package mtd.tasker;
 
 import java.util.Scanner;
-import java.io.IOException;
 import mtd.tasker.protocol.Request;
 import mtd.tasker.protocol.RequestCode;
+import mtd.tasker.protocol.InvalidCommandException;
 import mtd.tasker.protocol.Response;
 
 /**
@@ -32,12 +32,22 @@ public CLI() {
 
     public static void commands() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("conntected! (exit with \'" + stopMessage + "\' )");
-        String cmd;
+        System.out.println("conntected! (exit with \'" + stopMessage + "\')");
+        String cmd = "";
         do {
-            cmd = sc.next();
-                Response resp = Client.request(new Request(RequestCode.fromCode(cmd.substring(1,cmd.indexOf(' '))),cmd));
+            cmd = sc.nextLine();
+            System.out.println(cmd + "test");
+            cmd = cmd.trim();
+            int spaceIndex = cmd.indexOf(' ');
+            if (cmd.isBlank() || spaceIndex == -1) {
+                continue;
+            }
+            try {
+                Response resp = Client.request(new Request(RequestCode.fromCode(cmd.substring(1,spaceIndex)),cmd));
                 System.out.println(resp);
+            } catch (InvalidCommandException e) {
+                e.printStackTrace();
+            }
         } while (!cmd.equals(stopMessage));
     }
 }

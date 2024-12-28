@@ -66,4 +66,18 @@ public class Event {
     public String toStringFormat() {
         return ID + ":" + title + "|" + from + "-" + to + "(" + person + "," + tag + ")"; 
     }
+
+    public String getPerson() {
+    return person;
+}
+
+    public String getTitle() {
+    return title;
+}
+    public Instant getTimeAdded() {
+    return timeAdded;
+}
+    public String getTag() {
+    return tag;
+}
 }

@@ -68,9 +68,11 @@ public class Client {
      */
     static public Response request(Request request) {
         try {
+            System.out.println("test");
             byte[] req = Serialisation.serialize(request);
             socket.write(req, req.length);
             byte[] resp = null;
+            System.out.println("test");
             int respLen = socket.read(resp, socket.dataAvailable());
             if ( respLen == -1) {
                 return null;
