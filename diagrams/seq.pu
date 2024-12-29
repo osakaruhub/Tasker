@@ -7,9 +7,12 @@ participant Server as S
 participant Login as auth
 participant Handler as H
 participant GUI as G
+database db
 
 C -> auth: Authentication Request (login())
-auth -> Server: formatted Authentication Request (login())
+auth -> S: formatted Authentication Request (login())
+S -> db: authenticate user
+db --> S: retrieve Calendars
 S --> C: retrieve Latest Calendars
 S --> H: format Events
 C ->> S: request sync
