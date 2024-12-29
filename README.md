@@ -6,9 +6,14 @@ This application come with the Server itself, and a graphical interface (and tui
 Roadmap:
     - [] list events
     - [] add events
-    - [] create a timetable
-    - [?] add a GUI
+    - [probably] create a timetable
+    - [x] add a GUI
     - [] add tests for faster debugging
+
+implementations
+
+    - [] get events from timerange/days in the future
+    - [] CLI - direct command prompt
 
 # How to run
 The prebuilt binaries include both the Server side and the Client side using according jar classes in /bin or the release page.

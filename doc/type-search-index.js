@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"Alle Klassen und Schnittstellen","u":"allclasses-index.html"},{"p":"mtd.tasker.protocol","l":"Request"},{"p":"mtd.tasker.protocol","l":"RequestCode"},{"p":"mtd.tasker.protocol","l":"Response"},{"p":"mtd.tasker.protocol","l":"StatusCode"}];updateSearchResults();
