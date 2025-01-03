@@ -24,9 +24,10 @@ public class Server {
                 while (!close) {
                     Socket socket = sSocket.accept();
                     Thread clientThread = new Thread(new ClientThread(socket));
-                    System.out.println("New client connected!");
+                    String ip = socket.readLine();
+                    System.out.println("New client (" + ip + ") connected!");
                     clientThread.start();
-                    clients.add(new Clientp(socket, clientThread)); 
+                    clients.add(new Clientp(socket, clientThread, ip)); 
                     socket.write("connected!\n");
                 }
             } catch (IOException e) {
@@ -80,62 +81,67 @@ class ClientThread implements Runnable {
     }
 
     // BUG: too many try catches to bother, dont wanna do it rn
-    // also maybe put refactor more into Serverhandle, looks hideous rn
+    // also maybe refactor more into Serverhandle, looks hideous rn
+    // of course when database is not yet ready
     void handleRequest(Request request) throws IOException {
         // TODO: Handle Client Requests
         byte[] response;
         switch (request.getRequestCode()) {
             case RequestCode.ADD:
-            // NOTE: change this when changing to a database
-            response = Serialisation.serialize(addEvent(request.getContent())?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR));
-            socket.write(response, response.length);
-                break;
+                // NOTE: change this when changing to a database
+                response = Serialisation.serialize(addEvent(request.getContent())?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR));
+                socket.write(response, response.length);
+            break;
             case RequestCode.DELETE:
-            Response resp;
-            // NOTE: change this when changing to a database
-            try {
-                resp = remove(request.getContent());
-            } catch (Exception e) {resp = new Response(StatusCode.NOT_FOUND);}
-            response = Serialisation.serialize(resp); 
-            socket.write(response, response.length);
+                Response resp;
+                // NOTE: change this when changing to a database
+                try {
+                    resp = remove(request.getContent());
+                } catch (Exception e) {resp = new Response(StatusCode.NOT_FOUND);}
+                response = Serialisation.serialize(resp); 
+                socket.write(response, response.length);
             break;
             case RequestCode.SYNC:
                 response = Serialisation.serialize(sync());
                 socket.write(response, response.length);
                 break;
             case RequestCode.GET:
-            String msg = request.getContent();
-            String cmd[] = msg.split(";");
-            // NOTE: change this when changing to a database
-            switch (cmd[0]) {
-                case "person":
-                response = Serialisation.serialize(ServerHandle.getByName(cmd[1]));
+                String msg = request.getContent();
+                String cmd[] = msg.split(";");
+                // NOTE: change this when changing to a database
+                switch (cmd[0]) {
+                    case "person":
+                        response = Serialisation.serialize(ServerHandle.getByPerson(cmd[1]));
                     break;
-
-                default:
+                    case "tag":
+                        response = Serialisation.serialize(ServerHandle.getByTag(cmd[1]));
                     break;
-            }
-            socket.write(response, response.length);
+                    default:
+                        response = Serialisation.serialize(ServerHandle.getByPerson(cmd[1]));
+                    break;
+                }
+                socket.write(response, response.length);
             break;
             case RequestCode.SU:
-            if (ServerHandle.su(request.getContent())) {
-                response = Serialisation.serialize(new Response(StatusCode.OK));
-                socket.write(response, response.length);
-                admin = true;
-            } else {
-                response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
-                socket.write(response, response.length);
-            }
-            case RequestCode.LIST:
-            // NOTE: change this when changing to a database
-            if (admin) {
-                response = Serialisation.serialize(new Response(StatusCode.OK, listClients()));
-                socket.write(response, response.length);
+                if (ServerHandle.su(request.getContent())) {
+                    response = Serialisation.serialize(new Response(StatusCode.OK));
+                    socket.write(response, response.length);
+                    admin = true;
                 } else {
                     response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
                     socket.write(response, response.length);
                 }
-                break;
+            break;
+            case RequestCode.LIST:
+            // NOTE: change this when changing to a database
+                if (admin) {
+                    response = Serialisation.serialize(new Response(StatusCode.OK, listClients()));
+                    socket.write(response, response.length);
+                } else {
+                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
+                    socket.write(response, response.length);
+                }
+            break;
             case RequestCode.KICK:
                 if (admin) {
                     try {
@@ -148,10 +154,11 @@ class ClientThread implements Runnable {
                         socket.write(response, response.length);
                     }
                 }
-                break;
+            break;
             case RequestCode.EXIT:
                 socket.close();
                 running = false;
+            break;
             case RequestCode.CLOSE:
                 if (!admin) {
                     response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
@@ -159,9 +166,10 @@ class ClientThread implements Runnable {
                 multicast(new Request(RequestCode.EXIT));
                 close();
             }
+            break;
             default:
-            response = Serialisation.serialize(new Response(StatusCode.BAD_REQUEST));
-            socket.write(response, response.length);
+                response = Serialisation.serialize(new Response(StatusCode.BAD_REQUEST));
+                socket.write(response, response.length);
             break;
         }
     }
@@ -183,7 +191,7 @@ class ClientThread implements Runnable {
 
     private Boolean kick(int id) throws IOException {
         if (id < ServerHandle.events.size() - 1 && id >= 0) {
-            Server.clients.get(id).socket.close();
+            Server.clients.get(id).getSocket().close();
             return true;
         } else {
             return false;
@@ -208,7 +216,7 @@ class ClientThread implements Runnable {
         }
         for (Clientp client : Server.clients) {
             try {
-            client.socket.write(request, request.length);
+            client.getSocket().write(request, request.length);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("couldnt send to client: " + client.id);
@@ -224,7 +232,7 @@ class ClientThread implements Runnable {
         try {
             System.out.println("closing all clients...");
             for (Clientp client : Server.clients) {
-                client.socket.close();
+                client.getSocket().close();
             }
             System.out.println("closing the server...");
             Server.sSocket.close();
@@ -237,21 +245,21 @@ class ClientThread implements Runnable {
 }
 
 class HeartbeatChecker implements Runnable {
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    Thread.sleep(1000); // Check every second
-                    checkThreads();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(1000); // Check every second
+                checkThreads();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
         }
-
-        private void checkThreads() {
-            // Iterate through the list and remove dead threads
-            Server.clients.removeIf(client -> !client.thread.isAlive());
-        }
     }
+
+    private void checkThreads() {
+        // Iterate through the list and remove dead threads
+        Server.clients.removeIf(client -> !client.getThread().isAlive());
+    }
+}

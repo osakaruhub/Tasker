@@ -2,6 +2,7 @@ package mtd.tasker;
 
 import socketio.Socket;
 import java.io.IOException;
+import java.net.InetAddress;
 
 import mtd.tasker.protocol.Response;
 import mtd.tasker.protocol.Request;
@@ -54,6 +55,10 @@ public class Client {
                 }
             }
         } while (socket == null);
+        try {
+                socket.write(InetAddress.getLocalHost().getHostAddress() + "\n");
+        } catch (Exception e) {
+        }
     }
 
     public Boolean verbinden() {
@@ -68,15 +73,15 @@ public class Client {
      */
     static public Response request(Request request) {
         try {
-            System.out.println("test");
+            System.out.println("requesting " + request.getCode());
             byte[] req = Serialisation.serialize(request);
             socket.write(req, req.length);
             byte[] resp = null;
-            System.out.println("test");
             int respLen = socket.read(resp, socket.dataAvailable());
             if ( respLen == -1) {
                 return null;
             }
+            System.out.println("response in bytes: " + resp.toString());
             return (Response) Serialisation.deserialize(resp);
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,8 +106,16 @@ public class Client {
     // NOTE: solange GUI nicht vollständig ist, ist der main in Client, EDIT: habe auch Klassen TUI fuer 'Terminal User Interface' und CLI fuer die Kommandozeile erstellt, sodass sie temporaer zum Main gehoren
     public static void main(String[] args) {
         Client c = new Client();
-        c.verbinden();
-        while(true);
+        while(true) {
+            byte[] req = null;
+            try {
+                Client.socket.read(req, Client.socket.dataAvailable());
+                if (req != null) {
+                    Handler.addEvent(((Request) Serialisation.deserialize(req)).getContent());
+                }
+            } catch (Exception e) {
+            }
+        }
         //c.close();
     }
 }

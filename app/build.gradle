@@ -44,14 +44,14 @@ task runServer(type: JavaExec) {
 
 task runClient(type: JavaExec) {
     group = 'application'
-    description = 'Runs the client application'
+    description = 'Runs the Client application (testing)'
     main = 'mtd.tasker.Client'
     classpath = sourceSets.main.runtimeClasspath
 }
 
 task runCLI(type: JavaExec) {
     group = 'application'
-    description = 'Runs the client application'
+    description = 'Runs the CLI application (dev)'
     main = 'mtd.tasker.CLI'
     classpath = sourceSets.main.runtimeClasspath
 }

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Handler
+ * Handler - Intermediary for Client and GUI - handles locally saved events
+ *
  */
 public class Handler {
     static private ArrayList<Event> entries;
@@ -25,6 +26,17 @@ public class Handler {
 
     static public Event getEvent(int id) {
         return entries.get(id);
+    }
+
+    static public Boolean addEvents(List<Event> events) {
+        return true;
+    }
+
+    
+    static public Boolean addEvent(String content) throws NumberFormatException {
+        String[] field = content.split(":");
+        entries.add(new Event(field[0], field[1], Double.parseDouble(field[2]), Double.parseDouble(field[3]), field[4]));
+        return true;
     }
 
     static public int addEvent(String title, String person, double from, double to, String tag) {

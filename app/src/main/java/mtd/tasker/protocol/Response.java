@@ -1,7 +1,5 @@
 package mtd.tasker.protocol;
 
-import mtd.tasker.protocol.StatusCode;
-
 /**
  * Response - class for handling Responses
  */
@@ -19,6 +17,7 @@ public class Response {
             throw new IllegalArgumentException("Response Contructor call with message has to be enum value OK");
         }
         this.code = code;
+        this.content = msg;
     }
 
  /**
