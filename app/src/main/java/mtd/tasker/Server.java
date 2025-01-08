@@ -3,6 +3,7 @@ package mtd.tasker;
 import socketio.ServerSocket;
 import socketio.Socket;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 import mtd.tasker.protocol.*;
@@ -62,8 +63,7 @@ class ClientThread implements Runnable {
                 if (len <= 0) {
                     continue;
                 }
-                int msgLen = socket.read(msg, len);
-                if (msgLen == -1) {
+                if (socket.read(msg,len) == -1) {
                     continue;
                 }
             } catch (IOException e) {
@@ -181,11 +181,11 @@ class ClientThread implements Runnable {
     private Boolean addEvent(String content) {
         String[] event = content.split(":");
         try {
-            ServerHandle.events.add(new Event(event[0], event[1], Double.parseDouble(event[2]), Double.parseDouble(event[3]), event[4]));
-            multicast(new Request(RequestCode.ADD, content));
-        } catch (NumberFormatException e) {
+            EventHandler.addEvent(new Event(event[0], event[1], event[2], event[3]));
+        } catch (ParseException e) {
             return false;
         }
+        multicast(new Request(RequestCode.ADD, content));
         return true;
     }
 

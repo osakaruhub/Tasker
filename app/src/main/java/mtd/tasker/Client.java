@@ -6,6 +6,7 @@ import java.net.InetAddress;
 
 import mtd.tasker.protocol.Response;
 import mtd.tasker.protocol.Request;
+import mtd.tasker.protocol.RequestCode;
 
 public class Client {
 
@@ -32,6 +33,9 @@ public class Client {
         this.host = host;
         this.port = port;
         connect();
+        Thread c = new Thread(new ServerThread(socket));
+        c.setDaemon(true);
+        c.start();
     }
 
     public void connect() {
@@ -107,15 +111,44 @@ public class Client {
     public static void main(String[] args) {
         Client c = new Client();
         while(true) {
-            byte[] req = null;
-            try {
-                Client.socket.read(req, Client.socket.dataAvailable());
-                if (req != null) {
-                    Handler.addEvent(((Request) Serialisation.deserialize(req)).getContent());
-                }
-            } catch (Exception e) {
-            }
         }
         //c.close();
+    }
+}
+
+class ServerThread implements Runnable {
+    Socket s;
+
+    public ServerThread(Socket s) {
+        this.s = s;
+    }
+
+    public void run() {
+        while (true) {
+            try {
+                int dataAvailable = s.dataAvailable();
+                if (dataAvailable == 0) {
+                    continue;
+                }
+                byte[] msg = null;
+                if (s.read(msg, dataAvailable) == -1) {
+                    continue;
+                }
+                Request req = (Request) Serialisation.deserialize(msg);
+                switch (req.getRequestCode()) {
+                    case RequestCode.ADD:
+                        Handler.addEvent(req.getContent());
+                        break;
+                    case RequestCode.DELETE:
+                        Handler.deleteEntry(req.getContent());
+                        break;
+                    default:
+                        break;
+                }
+                
+            } catch (Exception e) {
+                continue;
+            }
+        }
     }
 }
