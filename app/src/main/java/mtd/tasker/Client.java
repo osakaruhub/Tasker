@@ -80,11 +80,8 @@ public class Client {
             System.out.println("requesting " + request.getCode());
             byte[] req = Serialisation.serialize(request);
             socket.write(req, req.length);
-            byte[] resp = null;
-            int respLen = socket.read(resp, socket.dataAvailable());
-            if ( respLen == -1) {
-                return null;
-            }
+            byte[] resp = new byte[1024];
+            if (socket.read(resp, socket.dataAvailable()) == -1) return null;
             System.out.println("response in bytes: " + resp.toString());
             return (Response) Serialisation.deserialize(resp);
         } catch (Exception e) {
@@ -127,13 +124,8 @@ class ServerThread implements Runnable {
         while (true) {
             try {
                 int dataAvailable = s.dataAvailable();
-                if (dataAvailable == 0) {
-                    continue;
-                }
                 byte[] msg = null;
-                if (s.read(msg, dataAvailable) == -1) {
-                    continue;
-                }
+                if (dataAvailable == 0 && s.read(msg, dataAvailable) == -1) continue;
                 Request req = (Request) Serialisation.deserialize(msg);
                 switch (req.getRequestCode()) {
                     case RequestCode.ADD:

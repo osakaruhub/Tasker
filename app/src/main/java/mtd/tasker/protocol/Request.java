@@ -1,10 +1,14 @@
 package mtd.tasker.protocol;
 
+import java.io.Serializable;
+
 /**
  * Class for Request for the socket. A Request consists of a RequestCode and its content.
  *
  */
-public class Request {
+public class Request implements Serializable{
+
+    private static final long serialVersionUID = 1L; // Recommended for Serializable classes
     private RequestCode code;
     private String content;
 

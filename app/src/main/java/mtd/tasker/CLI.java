@@ -30,24 +30,24 @@ public CLI() {
     commands();
 }
 
+    
     public static void commands() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("conntected! (exit with \'" + stopMessage + "\')");
-        String cmd = "";
+        System.out.println("conntected! (exit with \'" + stopMessage + "\')\n");
+        String msg = "";
         do {
-            cmd = sc.nextLine();
-            System.out.println(cmd + "test");
-            cmd = cmd.trim();
-            int spaceIndex = cmd.indexOf(' ');
-            if (cmd.isBlank() || spaceIndex == -1) {
-                continue;
-            }
+            msg = sc.nextLine().trim();
+            //int spaceIndex = msg.indexOf(' ');
+            if (msg.isBlank()) continue;
+            String[] com = msg.split(" ");
+            if (com.length != 2) continue;
             try {
-                Response resp = Client.request(new Request(RequestCode.fromCode(cmd.substring(1,spaceIndex)),cmd));
-                System.out.println(resp);
+                Response resp = Client.request(new Request(RequestCode.fromCode(com[0]),com[1]));
+                System.out.println(resp.toString());
             } catch (InvalidCommandException e) {
                 e.printStackTrace();
             }
-        } while (!cmd.equals(stopMessage));
+        } while (!msg.equals(stopMessage));
+        sc.close();
     }
 }

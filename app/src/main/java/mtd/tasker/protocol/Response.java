@@ -1,9 +1,12 @@
 package mtd.tasker.protocol;
 
+import java.io.Serializable;
+
 /**
  * Response - class for handling Responses
  */
-public class Response {
+public class Response implements Serializable {
+    private static final long serialVersionUID = 1L; // Recommended for Serializable classes
     private StatusCode code;
     private String content;
 

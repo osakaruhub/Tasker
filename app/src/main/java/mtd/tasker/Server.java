@@ -57,15 +57,12 @@ class ClientThread implements Runnable {
 
     public void run() {
         while (running) {
-            byte[] msg = null;
+            byte[] msg = new byte[1024];
             try {
                 int len = socket.dataAvailable();
-                if (len <= 0) {
-                    continue;
-                }
-                if (socket.read(msg,len) == -1) {
-                    continue;
-                }
+                System.out.println(len);
+                //BUG: Somehow during the transission, the Request Object gets corrupted
+                if (len <= 0 && socket.read(msg,len) == -1) continue;
             } catch (IOException e) {
                 System.out.println("Client " + id + " disconnected!: " + e.getMessage());
                 running = false;
@@ -249,7 +246,7 @@ class HeartbeatChecker implements Runnable {
     public void run() {
         while (true) {
             try {
-                Thread.sleep(1000); // Check every second
+                Thread.sleep(5000); // Check every 5 seconds
                 checkThreads();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
