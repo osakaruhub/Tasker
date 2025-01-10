@@ -1,5 +1,8 @@
 package mtd.tasker;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import socketio.Socket;
 
 public class Clientp {
@@ -7,20 +10,20 @@ public class Clientp {
     public int id;
     private Socket socket;
     private Thread thread;
-    private String ip; 
+    private InetAddress ip; 
 
-    public Clientp(Socket s, Thread t, String ip) {
+    public Clientp(Socket s, Thread t, String ip) throws UnknownHostException {
         this.id = ++ID;
         this.socket = s;
         this.thread = t;
-        this.ip = ip;
+        this.ip = InetAddress.getByName(ip);
     }
 
     public int getId() {
         return id;
     }
     public String getIp() {
-        return ip;
+        return ip.toString();
     }
 
     public Thread getThread() {
@@ -29,5 +32,11 @@ public class Clientp {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return id + ": " + ip.toString();
     }
 }

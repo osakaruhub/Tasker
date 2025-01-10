@@ -22,6 +22,7 @@ public class Server {
                 sSocket = new ServerSocket(port);
                 System.out.println("starting server at " + host + ":" + port);
                 System.out.println("listening for clients...");
+                new Thread(new HeartbeatChecker()).start();
                 while (!close) {
                     Socket socket = sSocket.accept();
                     Thread clientThread = new Thread(new ClientThread(socket));
@@ -195,7 +196,7 @@ class ClientThread implements Runnable {
         }
     }
 
-    private Response remove(String event) throws NumberFormatException{
+    private Response remove(String event) throws NumberFormatException {
         int id = Integer.parseInt(event);
         if (id >= 0 && Integer.parseInt(event) < ServerHandle.events.size()) {
             ServerHandle.events.remove(id);
@@ -222,7 +223,11 @@ class ClientThread implements Runnable {
     }
 
     String listClients() {
-        return "stub";
+        String str = new String();
+        for (Clientp cli : Server.clients) {
+            str += cli.toString();
+        }
+        return str;
     } 
 
     private void close() {
