@@ -1,0 +1,258 @@
+@startuml
+scale 0.8
+
+class Event{
+    - timeAdded : Instant
+    - ID : UUID
+    - title : String
+    - person : String
+    - date : Date
+    - tag : String
+    + Event(title : String, person : String, date : Date, tag : String)
+    + Event(title : String, person : String, date : Date)
+    + Event(title : String, person : String, date : int, tag : String)
+    + Event(title : String, person : String, date : int)
+    + Event(title : String, person : String, date : String, tag : String)
+    + toString() : String
+    + toStringFormat() : String
+    + getPerson() : String
+    + getID() : String
+    + getTitle() : String
+    + getDate() : Date
+    + getTimeAdded() : Instant
+    + getTag() : String
+}
+class Response{
+    - {static} serialVersionUID : long
+    - code : StatusCode
+    - content : String
+    + Response(code : StatusCode, msg : String)
+    + Response(code : StatusCode)
+    + getContent() : String
+    + getStatusCode() : StatusCode
+    + getCode() : String
+}
+top to bottom direction
+package Server-Side <<Frame>> {
+    class Server{
+        - {static} port : Integer
+        - {static} host : String
+        + {static} ADMIN_PASS : String
+        + {static} sSocket : ServerSocket
+        + {static} clients : ArrayList<Clientp>
+        + {static} close : Boolean
+        + Server()
+        + {static} main(args : String[]) : void
+    }
+    class SQLConnection{
+        - {static} URL : String
+        - {static} USER : String
+        - {static} PASSWORD : String
+        + {static} getInstance() : SQLConnection
+        + getConnection() : Connection
+    }
+
+    class EventHandler{
+        + {static} addEvent(event : Event) : Boolean
+        + {static} removeEvent(id : String) : Boolean
+    }
+    class ServerHandle{
+        + {static} events : ArrayList<Event>
+        + {static} su(pass : String) : Boolean
+        + {static} getByTag(tag : String) : Response
+        + {static} getByPerson(person : String) : Response
+    }
+    class ServerThread{
+        s : Socket
+        + ServerThread(s : Socket)
+        + run() : void
+    }
+    class Runnable {
+        + run()
+    }
+    class Clientp{
+        {static} ID : int
+        + id : int
+        - socket : Socket
+        - thread : Thread
+        - ip : InetAddress
+        + Clientp(s : Socket, t : Thread, ip : String)
+        + getId() : int
+        + getIp() : String
+        + getThread() : Thread
+        + getSocket() : Socket
+        + toString() : String
+    }
+    class InstanceHolder{
+        - {static} INSTANCE : SQLConnection
+    }
+    class HeartbeatChecker{
+        + run() : void
+        - checkThreads() : void
+    }
+    class ClientThread{
+        socket : Socket
+        {static} ID : int
+        - id : int
+        running : Boolean
+        - admin : Boolean
+        + ClientThread(socket : Socket)
+        + run() : void
+    )
+    handleRequest(request : Request) : void
+        + sync() : Boolean
+        - addEvent(content : String) : Boolean
+        - kick(id : int) : Boolean
+        - remove(event : String) : Response
+        - multicast(req : Request) : void
+        listClients() : String
+        - close() : void
+    }
+}
+top to bottom direction
+package Client-Side <<Frame>> {
+    class CLI{
+        {static} c : Client
+        - {static} stopMessage : String
+        + CLI()
+        + {static} main(args : String[]) : void
+        + {static} commands() : void
+    }
+    class Client{
+        - {static} DEF_PORT : int
+        - {static} DEF_HOST : String
+        - host : String
+        - port : int
+        - {static} socket : Socket
+        + Client()
+        + Client(host : String, port : int)
+        + connect() : void
+        + verbinden() : Boolean
+        + {static} request(request : Request) : Response
+        + close() : void
+        + {static} main(args : String[]) : void
+    }
+    class KalenderApp{
+        - {static} WOCHENTAGE : String[]
+        - {static} currentGUIDate : Calendar
+        - {static} currentDate : Calendar
+        - table : JTable
+        + clearTimeFields(calendar : Calendar)
+        + KalenderApp()
+        + createKalenderUI() : void
+        + updateKalenderTable() : void
+        - {static} navigateMonth(monatJahrLabel : JLabel, delta : int) : void
+        - handleTableClick(e : MouseEvent) : void
+        - {static} updateMonatJahrLabel(monatJahrLabel : JLabel) : void
+        - {static} getFirstDayOfMonth(calendar : Calendar) : int
+        - {static} getDaysInMonth() : int
+        + {static} main(args : String[]) : void
+    }
+    class Handler{
+        + {static} dateFormat : SimpleDateFormat
+        - {static} entries : ArrayList<Event>
+        - {static} tags : List<String>
+        - {static} OK : int
+        + {static} getEvents() : Event[]
+        + {static} getEvent(id : int) : Event
+        + {static} getEventsByTag(tag : String) : List<Event>
+        + {static} getEventsByDate(date : Date) : List<Event>
+        + {static} getEventsByPerson(person : String) : List<Event>
+        + {static} addEvents(events : List<Event>) : Boolean
+        + {static} addEvent(content : String) : Boolean
+        + {static} addEvent(e : Event) : int
+        + {static} getTags() : List<String>
+        + {static} getTagsString() : String
+        + {static} deleteEntry(uid : String) : Boolean
+        + {static} sync() : void
+        }
+    class TUI{
+    }
+}
+
+class Serialisation{
+    + {static} serialize(object : Object) : byte[]
+    + {static} deserialize(bytes : byte[]) : Object
+}
+    note bottom
+        (de-)serialize Request/Request
+        for transmission
+    end note
+class Request{
+    - {static} serialVersionUID : long
+    - code : RequestCode
+    - content : String
+    + Request(code : RequestCode, content : String)
+    + Request(code : RequestCode)
+    + getContent() : String
+    + getCode() : String
+    + getRequestCode() : RequestCode
+    + toString() : String
+    }
+class InvalidCommandException{
+    - code : String
+    + InvalidCommandException(code : String)
+    + getCode() : String
+}
+Server --* "*" Clientp
+Response --* "- code" StatusCode
+Response ..|> Serializable
+Request --* "- code" RequestCode
+Request ..|> Serializable
+InstanceHolder --"- {static} INSTANCE" SQLConnection
+ClientThread ..|> Runnable
+Handler --> "- List<events>" Event 
+CLI --> Client
+TUI --> Client
+KalenderApp --> Client : "{static} c" 
+InvalidCommandException --|> RuntimeException
+HeartbeatChecker ..|> Runnable
+ServerThread ..|> Runnable
+HeartbeatChecker -> Server : start as daemon
+ServerThread -> Server : start
+StatusCode -- InvalidCommandException : throws
+RequestCode -- InvalidCommandException : throws
+
+
+enum RequestCode{
+    ADD
+    DELETE
+    GET
+    SYNC
+    LIST
+    KICK
+    SU
+    EXIT
+    CLOSE
+}
+enum StatusCode{
+    OK
+    NOT_FOUND
+    SERVER_ERROR
+    BAD_REQUEST
+    PERMISSION_ERROR
+}
+
+database mysql {
+entity "User" {
+    userID INT <<PK>>
+    name TINYTEXT
+    pass CHAR(256)
+}
+note right: hash passcode of course
+
+entity "Event" {
+    KalendarID INT <<PK>>
+    title VARCHAR(30)
+    userID <<FK>>
+    from DATETIME
+    til DATETIME
+    tag TINYTEXT
+}
+
+Event o-- User
+}
+
+ServerHandle -- mysql
+
+@enduml

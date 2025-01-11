@@ -26,7 +26,7 @@ public enum StatusCode {
                 return stat;
             }
         }
-        return null;
+        throw new InvalidCommandException(code);
     }
 
     public String getCode() {

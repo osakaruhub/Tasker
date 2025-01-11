@@ -1,6 +1,7 @@
 package mtd.tasker.protocol;
 
 import java.io.Serializable;
+import mtd.tasker.protocol.InvalidCommandException;
 
 /**
  * Class for Request for the socket. A Request consists of a RequestCode and its content.

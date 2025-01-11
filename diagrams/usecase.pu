@@ -1,0 +1,20 @@
+@startuml
+left to right direction
+
+actor user as u
+actor "admin" as a
+
+package GUI {
+usecase "add events" as UC1
+usecase "delete events" as UC2
+usecase "get events" as UC3
+usecase "list clients" as UC4
+usecase "kick connections" as UC5
+}
+
+a --> UC4
+a --> UC5
+u --> UC1
+u --> UC2
+u --> UC3
+@enduml
