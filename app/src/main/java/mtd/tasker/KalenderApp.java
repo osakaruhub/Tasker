@@ -14,6 +14,7 @@ public class KalenderApp {
 
     private static Calendar currentGUIDate;
     private static Calendar currentDate;
+    private static Client c;
     private JTable table;
 
     public KalenderApp() {
@@ -102,18 +103,17 @@ public class KalenderApp {
             JMenuItem infoItem = new JMenuItem("Information: " + value.toString());
             popupMenu.add(infoItem);
 
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JTextField nameField = new JTextField();
+            JTextField tagField = new JTextField();
+            Object[] message = {
+                "Name:", nameField,
+                "Grund:", tagField,
+            };
 
-            JButton closeButton = new JButton("Abbrechen");
-            closeButton.addActionListener(event -> popupMenu.setVisible(false));
-
-            JButton actionButton = new JButton("Buchen");
-            actionButton.addActionListener(event -> JOptionPane.showMessageDialog(table, "Termin gebucht!"));
-
-            buttonPanel.add(actionButton);
-            buttonPanel.add(closeButton);
-
-            popupMenu.add(buttonPanel);
+            int option = JOptionPane.showConfirmDialog(null, message, "Register", JOptionPane.OK_CANCEL_OPTION);
+            if (option == JOptionPane.OK_OPTION && true) {
+                JOptionPane.showMessageDialog(table, "Termin gebucht!"); // TODO: add functionality
+            }
 
             popupMenu.show(table, e.getX(), e.getY());
         }
@@ -152,6 +152,12 @@ public class KalenderApp {
     }
 
     public static void main(String[] args) {
+        try {
+            c = (args.length == 2 && args[0] != null && args[1] != null)?new Client(args[0], Integer.parseInt(args[1])):new Client();
+        } catch (NumberFormatException e) {
+            System.out.println("not a port: " + args[1]);
+            System.exit(1);
+        }
         new KalenderApp().createKalenderUI();
     }
 }

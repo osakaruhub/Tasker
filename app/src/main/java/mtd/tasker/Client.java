@@ -3,6 +3,7 @@ package mtd.tasker;
 import socketio.Socket;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 import mtd.tasker.protocol.Response;
 import mtd.tasker.protocol.Request;
@@ -77,6 +78,7 @@ public class Client {
      */
     static public Response request(Request request) {
         try {
+            if (!socket.connect()) throw new SocketException("Socket is closed, try opening the class again");
             System.out.println("requesting " + request.getCode());
             byte[] req = Serialisation.serialize(request);
             socket.write(req, req.length);
@@ -102,14 +104,6 @@ public class Client {
             System.out.println("Konnte nicht die Verbindung schliessen");
             System.exit(1);
         }
-    }
-
-    // NOTE: solange GUI nicht vollständig ist, ist der main in Client, EDIT: habe auch Klassen TUI fuer 'Terminal User Interface' und CLI fuer die Kommandozeile erstellt, sodass sie temporaer zum Main gehoren
-    public static void main(String[] args) {
-        Client c = new Client();
-        while(true) {
-        }
-        //c.close();
     }
 }
 

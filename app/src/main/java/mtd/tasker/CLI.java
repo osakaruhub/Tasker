@@ -15,18 +15,16 @@ public class CLI {
     static private final String stopMessage = "exit";
 
     public static void main(String[] args) {
-        //try {
-        //    if (args != null && args[0] != null && args[1] != null) {
-        //    c = new Client(args[0], Integer.parseInt(args[1]));
-        //} else {
-        //}
-            //} catch (NumberFormatException e) {
-            //    System.exit(1);
+        try {
+            c = (args.length == 2 && args[0] != null && args[1] != null)? new Client(args[0], Integer.parseInt(args[1])):new Client();
+        } catch (NumberFormatException e) {
+            System.out.println("not a port: " + args[1]);
+            System.exit(1);
+        }
         new CLI();
     }
 
 public CLI() {
-    c = new Client();
     commands();
 }
 
@@ -42,7 +40,7 @@ public CLI() {
             String[] com = msg.split(" ");
             if (com.length != 2) continue;
             try {
-                Response resp = Client.request(new Request(RequestCode.fromCode(com[0]),com[1]));
+                Response resp = c.request(new Request(RequestCode.fromCode(com[0]),com[1]));
                 System.out.println(resp.toString());
             } catch (InvalidCommandException e) {
                 e.printStackTrace();
