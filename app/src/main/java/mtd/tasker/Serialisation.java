@@ -17,11 +17,15 @@ public class Serialisation {
  * @throws IOException
  */
     public static byte[] serialize(Object object) throws IOException {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream out = new ObjectOutputStream(bos)) {
+        ObjectOutputStream out = null;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            out = new ObjectOutputStream(bos);
             out.writeObject(object);
+            out.flush();
             return bos.toByteArray();
-        } 
+        } finally {
+            if (out != null) out.close();
+        }
     }
 
     /**
@@ -31,13 +35,17 @@ public class Serialisation {
  * @return Object the abstract Object of the bytes given
  * @throws throw new RuntimeException(ex); 
  */
-    public static Object deserialize(byte[] bytes) {
+    public static Object deserialize(byte[] bytes) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        ObjectInput in = null;
 
-        try (ObjectInput in = new ObjectInputStream(bis)) {
-            return in.readObject();
+        try {
+            in = new ObjectInputStream(bis);
+            return (Object) in.readObject();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        } finally {
+            if (in != null) in.close();
         }
     }
 }

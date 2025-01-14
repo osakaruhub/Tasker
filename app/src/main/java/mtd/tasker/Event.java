@@ -12,11 +12,11 @@ import java.util.UUID;
 public class Event {
     private Instant timeAdded; // for sync
     private final UUID ID;
-    private String title;
     private String person;
     private Date date;
     private String tag;
 
+    // TODO: make this easier to handle, maybe with a EventBuilder class with withX methods
     /**
      * create an Event
      *
@@ -24,10 +24,9 @@ public class Event {
      * @param person the person the event is for
      * @param tag the tag of the event
      */
-    public Event(String title, String person, Date date, String tag) {
+    public Event(Date date,String person, String tag) {
         this.timeAdded = Instant.now();
         this.ID = UUID.randomUUID();
-        this.title = title;
         this.person = person;
         this.date = date;
         this.tag = tag;
@@ -40,23 +39,28 @@ public class Event {
      * @param person the person the event is for
      * @param date the date of the event
      */
-    public Event(String title, String person, Date date) {
-        this(title, person, date, null);
+    public Event(Date date, String person) {
+        this(date,person, null);
     }
 
     // time is the seconds after the unix epoch, which it will convert to date
-    public Event(String title, String person, int date, String tag) {
-        this(title, person, new Date(date * 1000), tag);
+    public Event(int date, String person) {
+        this(new Date(date * 1000),person, null);
     }
 
-    // time is the seconds after the unix epoch, which it will convert to date
-    public Event(String title, String person, int date) {
-        this(title, person, new Date(date * 1000), null);
+    // same as last one but with tag
+    public Event(int date, String person, String tag) {
+        this(new Date(date * 1000),person, tag);
     }
 
-    // a String that is of pattern 'DD,MM,YY,HH,MM'
-    public Event(String title, String person, String date, String tag) throws ParseException {
-        this(title, person, Handler.dateFormat.parse(date), tag);
+    // a String that is of pattern 'DD,mm,YY,HH,MM'
+    public Event(String date, String person) throws ParseException {
+        this(Handler.dateFormat.parse(date), person, null);
+    }
+
+    // same as last one but with tag
+    public Event(String date, String person, String tag) throws ParseException {
+        this(Handler.dateFormat.parse(date), person, tag);
     }
 
     /**
@@ -66,7 +70,7 @@ public class Event {
      */
     @Override
     public String toString() {
-        return title + ":" + Handler.dateFormat.format(date) + ":" + person + ":" + tag;
+        return Handler.dateFormat.format(date) + ":" + person + ":" + tag;
     }
 
     /**
@@ -75,7 +79,7 @@ public class Event {
      * @return String - a formatted String of the event
      */
     public String toStringFormat() {
-        return ID + ":" + title + "|" + date + "(" + person + "," + tag + ")"; 
+        return ID + ":" + date + "(" + person + "," + tag + ")"; 
     }
 
     public String getPerson() {
@@ -84,10 +88,6 @@ public class Event {
 
     public String getID() {
         return ID.toString();
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public Date getDate() {

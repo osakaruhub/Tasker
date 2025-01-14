@@ -58,7 +58,7 @@ public class Handler {
     static public Boolean addEvent(String content) throws NumberFormatException {
         String[] field = content.split(":");
         try {
-            entries.add(new Event(field[0], field[1], field[2], field[3]));
+            entries.add(new Event(field[1], field[2], field[3]));
         } catch (ParseException e) {
             return false;
         }
@@ -100,11 +100,19 @@ public class Handler {
         return str;
     }
 
+    // delete an Entry locally and from the Server.
     static public Boolean deleteEntry(String uid) {
-    //    return Client.request(new Request(RequestCode.DELETE, id + "")).getStatusCode() == StatusCode.OK;
-        return entries.removeIf(obj -> obj.getID().equals(uid));
+        return entries.removeIf(entry -> 
+            entry.getID().equals(uid) && 
+            Client.request(new Request(RequestCode.DELETE, uid)).getStatusCode() == StatusCode.OK
+        );
     }
-      
+
+    // remove it only locally. useful when the Server requests for a deletion of an Event.
+    static public Boolean removeEntry(String uid) {
+        return entries.removeIf(entry -> entry.getID().equals(uid));
+    }
+
     static public void sync() {
         Response response = Client.request(new Request(RequestCode.SYNC));
         if (response.getStatusCode() == StatusCode.OK) {

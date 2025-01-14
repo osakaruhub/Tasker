@@ -9,18 +9,22 @@ import java.util.ArrayList;
 import mtd.tasker.protocol.*;
 
 public class Server {
-    private static final int port = 1234;
-    private static final String host = "localhost";
+    private static final String DEF_HOST = "localhost";
+    private static final int DEF_PORT = 1234;
+    private int port;
+    private String host;
     public static String ADMIN_PASS = "test";
     public static ServerSocket sSocket;
     public static ArrayList<Clientp> clients = new ArrayList<>();
     public static Boolean close = false;
 
-    public Server() {
+    public Server(String host, int port) {
+        this.host = host;
+        this.port = port;
         while (true) {
             try {
-                sSocket = new ServerSocket(port);
-                System.out.println("starting server at " + host + ":" + port);
+                sSocket = new ServerSocket(this.port);
+                System.out.println("starting server at " + this.host + ":" + this.port);
                 System.out.println("listening for clients...");
                 new Thread(new HeartbeatChecker()).start();
                 while (!close) {
@@ -39,8 +43,22 @@ public class Server {
         }
     }
 
+    /**
+     * create Client with default values
+     */
+    public Server() {
+        this(DEF_HOST, DEF_PORT);
+    }
+
+
     public static void main(String[] args) {
-        new Server();
+        Server S;
+        try {
+            S = (args.length == 2 && args[0] != null && args[1] != null)? new Server(args[0], Integer.parseInt(args[1])):new Server();
+        } catch (NumberFormatException e) {
+            System.out.println("not a port: " + args[1]);
+            System.exit(1);
+        }
     }
 }
 
@@ -68,9 +86,9 @@ class ClientThread implements Runnable {
                 System.out.println("Client " + id + " disconnected!: " + e.getMessage());
                 running = false;
             }
+            try {
             Request req = (Request) Serialisation.deserialize(msg);
             System.out.println("command gotten: " + req.toString());
-            try {
                 handleRequest(req);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -179,7 +197,7 @@ class ClientThread implements Runnable {
     private Boolean addEvent(String content) {
         String[] event = content.split(":");
         try {
-            EventHandler.addEvent(new Event(event[0], event[1], event[2], event[3]));
+            EventHandler.addEvent(new Event(event[0], event[1], event[2]));
         } catch (ParseException e) {
             return false;
         }
