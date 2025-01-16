@@ -5,6 +5,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import mtd.tasker.protocol.RequestCode;
+import mtd.tasker.protocol.Response;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -158,6 +159,9 @@ public class KalenderApp {
         int column = table.columnAtPoint(e.getPoint());
         Object value = table.getValueAt(row, column);
 
+        String[] appointments = Handler.addEvent(RequestCode.GET, value.toString()); //
+        // Suche alle Termine für diesen TAG
+
         if (value != null && !value.toString().isEmpty() && column < 5) {
             // Neues JDialog erstellen
             JDialog dialog = new JDialog();
@@ -257,8 +261,7 @@ public class KalenderApp {
         int row = table.rowAtPoint(e.getPoint());
         int column = table.columnAtPoint(e.getPoint());
         Object value = table.getValueAt(row, column);
-        String[] dateValues = value.toString().split("\\.");
-        String date = "" + dateValues[0] + "-" + dateValues[1] + "-" + dateValues[2];
+        String[] appointments = Handler.addEvent(RequestCode.GET, value.toString());
         // String[] dates = Handler.addEvent(RequestCode.GET, date);
         if (value != null && !value.toString().isEmpty() && column < 5) {
             // Neues JDialog erstellen
@@ -275,7 +278,7 @@ public class KalenderApp {
             String[] columnNames = { "Zeit", "Verfügbarkeit" };
 
             ArrayList<Object[]> dataList = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < appointments.length - 1; i++) {
                 // Check ob Zeit beriets vergeben ist
                 String option = "Zeit" + (i + 1);
                 String details = "Frei";
