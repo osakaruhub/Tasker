@@ -1,20 +1,20 @@
 package mtd.tasker;
 
 import javax.swing.*;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
+//import javax.swing.event.PopupMenuEvent;
+//import javax.swing.event.PopupMenuListener;
 
 import mtd.tasker.protocol.RequestCode;
-import mtd.tasker.protocol.Response;
+//import mtd.tasker.protocol.Response;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Date;
+//import java.sql.Date;
 import java.util.*;
-import java.text.*;
+//import java.text.*;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
+//import java.time.LocalDate;
+//import java.time.ZoneId;
 
 public class KalenderApp {
 
@@ -26,6 +26,7 @@ public class KalenderApp {
     private JTable table;
     private boolean admin = false;
     private String selected;
+    private static Client c;
 
     public KalenderApp() {
 
@@ -355,4 +356,15 @@ public class KalenderApp {
         return (dayOfWeek + 5) % 7; // Montag als erster Tag
     }
 
+    public static void main(String[] args) {
+        try {
+            // Client has to be instantiated for socket to be opened
+            c = (args.length == 2 && args[0] != null && args[1] != null)
+                    ? new Client(args[0], Integer.parseInt(args[1]))
+                    : new Client();
+        } catch (NumberFormatException e) {
+            System.out.println("not a port: " + args[1]);
+            System.exit(1);
+        }
+    }
 }
