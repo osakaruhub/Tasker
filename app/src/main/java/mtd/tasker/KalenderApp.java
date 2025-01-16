@@ -191,8 +191,8 @@ public class KalenderApp {
             ArrayList<Object[]> dataList = new ArrayList<>();
             for (int i = 0; i < 10; i++) {
                 // Check ob Zeit beriets vergeben ist
-                String option = "Zeit: " + (i + 7) + " Uhr";
-                String details = "NFrei";
+                String option = (i + 7) + "";
+                String details = "Frei";
 
                 // Erstelle ein Objekt-Array für jede Zeile
                 Object[] dataObject = { option, details };
@@ -229,9 +229,9 @@ public class KalenderApp {
 
             JButton actionButton = new JButton("Buchen");
             actionButton.addActionListener(event -> {
-                String date = value.toString() + "-" + selected + "-00";
+                String date = value.toString() + "." + selected + ".00";
                 if (!selected.equals(null)) {
-                    Handler.addEvent(title.getText() + ":" + name.getText() + ":" + date);
+                    Handler.addEvent(date + ":" + name.getText() + ":" + title.getText());
                 }
                 dialog.setVisible(false); // Dialog schließen nach Buchung
             });
