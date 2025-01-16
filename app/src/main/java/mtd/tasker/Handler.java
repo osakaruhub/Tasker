@@ -16,7 +16,7 @@ import java.util.ArrayList;
  *
  */
 public class Handler {
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm");
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy.HH.mm");
     static private ArrayList<Event> entries = new ArrayList<>();
     static private List<String> tags;
     private static final int OK = 0;
