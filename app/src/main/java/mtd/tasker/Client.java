@@ -6,9 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
 
-import mtd.tasker.protocol.Response;
-import mtd.tasker.protocol.Request;
-import mtd.tasker.protocol.RequestCode;
+import mtd.tasker.protocol.*;
 
 public class Client {
 
@@ -77,15 +75,16 @@ public class Client {
      * @param request the request that is being sent
      * @return Response - the Response from the Server
      */
-    static public Response request(Request req) {
+    static public Response request(Request request) {
         try {
             if (!socket.connect()) throw new SocketException("Socket is closed, try opening the class again");
             System.out.println("Requesting " + request.getCode());
 
             //byte[] req = Serialisation.serialize(request);
             //socket.write(req, req.length);
-            socket.write(req.toString);
-            return new Response (socket.readLine());
+            socket.write(request.toString() + "\n");
+            String[] msg = socket.readLine().trim().split(" ");
+            return new Response(StatusCode.fromCode(msg[1]), msg[2]);
             //byte[] resp = new byte[1024];
             //int bytesRead = socket.read(resp, resp.length);
             //
@@ -94,7 +93,6 @@ public class Client {
             //Response response = (Response) Serialisation.deserialize(resp);
             //System.out.println("Response in bytes: " + Arrays.toString(resp)); // Print byte array content
             //
-            return response;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

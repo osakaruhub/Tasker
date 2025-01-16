@@ -101,9 +101,7 @@ class ClientThread implements Runnable {
         }
     }
 
-    // BUG: too many try catches to bother, dont wanna do it rn
     // also maybe refactor more into Serverhandle, looks hideous rn
-    // of course when database is not yet ready
     void handleRequest(Request request) throws IOException {
         // TODO: Handle Client Requests
         Response response = null;
