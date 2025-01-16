@@ -55,3 +55,9 @@ task runCLI(type: JavaExec) {
     main = 'mtd.tasker.CLI'
     classpath = sourceSets.main.runtimeClasspath
 }
+
+task runBoth {
+    group = 'application'
+    description = 'Runs both server and client applications in parallel'
+    dependsOn runServer, runClient
+}

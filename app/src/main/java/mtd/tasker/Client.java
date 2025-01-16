@@ -77,25 +77,23 @@ public class Client {
      * @param request the request that is being sent
      * @return Response - the Response from the Server
      */
-    static public Response request(Request request) {
+    static public Response request(Request req) {
         try {
             if (!socket.connect()) throw new SocketException("Socket is closed, try opening the class again");
             System.out.println("Requesting " + request.getCode());
 
-            // Serialize the request object
-            byte[] req = Serialisation.serialize(request);
-            socket.write(req, req.length);
-
-            // Prepare to read the response
-            byte[] resp = new byte[1024];
-            int bytesRead = socket.read(resp, resp.length);
-
-            if (bytesRead == -1) return null; // End of stream
-
-            // Deserialize the response using the actual number of bytes read
-            Response response = (Response) Serialisation.deserialize(resp);
-            System.out.println("Response in bytes: " + Arrays.toString(resp)); // Print byte array content
-
+            //byte[] req = Serialisation.serialize(request);
+            //socket.write(req, req.length);
+            socket.write(req.toString);
+            return new Response (socket.readLine());
+            //byte[] resp = new byte[1024];
+            //int bytesRead = socket.read(resp, resp.length);
+            //
+            //if (bytesRead == -1) return null; // End of stream
+            //
+            //Response response = (Response) Serialisation.deserialize(resp);
+            //System.out.println("Response in bytes: " + Arrays.toString(resp)); // Print byte array content
+            //
             return response;
         } catch (Exception e) {
             e.printStackTrace();

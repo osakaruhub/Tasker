@@ -77,22 +77,20 @@ class ClientThread implements Runnable {
 
     public void run() {
         while (running) {
-            byte[] msg = new byte[1024];
+            //byte[] msg = new byte[1024];
             try {
-                // Check how many bytes are available to read
-                int len = socket.dataAvailable();
-                if (len > 0) {
-                    // Read the data into the byte array
-                    int bytesRead = socket.read(msg, Math.min(len, msg.length));
-                    if (bytesRead == -1) {
-                        continue; // End of stream
-                    }
-
-                    // Deserialize only the actual bytes read
-                    Request req = (Request) Serialisation.deserialize(msg);
-                    System.out.println("Command gotten: " + req.toString());
-                    handleRequest(req);
-                }
+                //    int len = socket.dataAvailable();
+                //    if (len > 0) {
+                //        int bytesRead = socket.read(msg, Math.min(len, msg.length));
+                //        if (bytesRead == -1) {
+                //            continue; // End of stream
+                //        }
+                //        Request req = (Request) Serialisation.deserialize(msg);
+                String[] msg = socket.readLine().trim().split(" ");
+                Request req = new Request(RequestCode.fromCode(msg[0]), msg[2]);
+                System.out.println("Command gotten: " + req.toString());
+                handleRequest(req);
+                //}
             } catch (IOException e) {
                 System.out.println("Client " + id + " disconnected!: " + e.getMessage());
                 running = false;
@@ -108,25 +106,20 @@ class ClientThread implements Runnable {
     // of course when database is not yet ready
     void handleRequest(Request request) throws IOException {
         // TODO: Handle Client Requests
-        byte[] response;
+        Response response = null;
         switch (request.getRequestCode()) {
             case RequestCode.ADD:
                 // NOTE: change this when changing to a database
-                response = Serialisation.serialize(addEvent(request.getContent())?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR));
-                socket.write(response, response.length);
+                response = addEvent(request.getContent())?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR);
             break;
             case RequestCode.DELETE:
-                Response resp;
                 // NOTE: change this when changing to a database
                 try {
-                    resp = remove(request.getContent());
-                } catch (Exception e) {resp = new Response(StatusCode.NOT_FOUND);}
-                response = Serialisation.serialize(resp); 
-                socket.write(response, response.length);
+                    response = remove(request.getContent());
+                } catch (NumberFormatException e) {response = new Response(StatusCode.NOT_FOUND);}
             break;
             case RequestCode.SYNC:
-                response = Serialisation.serialize(sync());
-                socket.write(response, response.length);
+                response = sync()?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR);
                 break;
             case RequestCode.GET:
                 String msg = request.getContent();
@@ -134,47 +127,39 @@ class ClientThread implements Runnable {
                 // NOTE: change this when changing to a database
                 switch (cmd[0]) {
                     case "person":
-                        response = Serialisation.serialize(ServerHandle.getByPerson(cmd[1]));
+                        response = ServerHandle.getByPerson(cmd[1]);
                     break;
                     case "tag":
-                        response = Serialisation.serialize(ServerHandle.getByTag(cmd[1]));
+                        response = ServerHandle.getByTag(cmd[1]);
                     break;
                     default:
-                        response = Serialisation.serialize(ServerHandle.getByPerson(cmd[1]));
+                        response = ServerHandle.getByPerson(cmd[1]);
                     break;
                 }
-                socket.write(response, response.length);
             break;
             case RequestCode.SU:
                 if (ServerHandle.su(request.getContent())) {
-                    response = Serialisation.serialize(new Response(StatusCode.OK));
-                    socket.write(response, response.length);
+                    response = new Response(StatusCode.OK);
                     admin = true;
                 } else {
-                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
-                    socket.write(response, response.length);
+                    response = new Response(StatusCode.PERMISSION_ERROR);
                 }
             break;
             case RequestCode.LIST:
             // NOTE: change this when changing to a database
-                if (admin) {
-                    response = Serialisation.serialize(new Response(StatusCode.OK, listClients()));
-                    socket.write(response, response.length);
-                } else {
-                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
-                    socket.write(response, response.length);
-                }
+                    response = admin?new Response(StatusCode.OK, listClients()):
+                                new Response(StatusCode.PERMISSION_ERROR);
+                    //socket.write(response, response.length);
+                    //socket.write(response, response.length);
             break;
             case RequestCode.KICK:
                 if (admin) {
                     try {
                         if (kick(Integer.parseInt(request.getContent()))) {
-                        response = Serialisation.serialize(new Response(StatusCode.OK, listClients()));
-                            socket.write(response, response.length);
+                        response = new Response(StatusCode.OK, listClients());
                         } else {}
                     } catch (Exception e) {
-                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
-                        socket.write(response, response.length);
+                    response = new Response(StatusCode.PERMISSION_ERROR);
                     }
                 }
             break;
@@ -184,17 +169,17 @@ class ClientThread implements Runnable {
             break;
             case RequestCode.CLOSE:
                 if (!admin) {
-                    response = Serialisation.serialize(new Response(StatusCode.PERMISSION_ERROR));
+                    response = new Response(StatusCode.PERMISSION_ERROR);
                 } else {
                 multicast(new Request(RequestCode.EXIT));
                 close();
             }
             break;
             default:
-                response = Serialisation.serialize(new Response(StatusCode.BAD_REQUEST));
-                socket.write(response, response.length);
+                response = new Response(StatusCode.BAD_REQUEST);
             break;
         }
+        socket.write(response.toString());
     }
 
     public Boolean sync() {

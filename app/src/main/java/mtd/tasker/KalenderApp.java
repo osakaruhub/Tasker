@@ -1,27 +1,37 @@
 package mtd.tasker;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+
+import mtd.tasker.protocol.RequestCode;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Date;
 import java.util.*;
+import java.text.*;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 public class KalenderApp {
 
     private static final String[] WOCHENTAGE = {
             "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"
     };
-
     private static Calendar currentGUIDate;
     private static Calendar currentDate;
-    private static Client c;
     private JTable table;
+    private boolean admin = false;
+    private String selected;
 
     public KalenderApp() {
-        // Initialisiere die aktuellen Daten
+
         currentDate = Calendar.getInstance();
         clearTimeFields(currentDate);
         currentGUIDate = (Calendar) currentDate.clone();
+        createKalenderUI();
     }
 
     private void clearTimeFields(Calendar calendar) {
@@ -53,6 +63,10 @@ public class KalenderApp {
         nextMonthButton.setBounds(500, 30, 150, 30);
         nextMonthButton.addActionListener(e -> navigateMonth(monatJahrLabel, 1));
 
+        JButton AdminView = new JButton("Admin");
+        AdminView.setBounds(50, 500, 70, 30);
+        AdminView.addActionListener(e -> loginAdminView(AdminView));
+
         table = new JTable(new Object[6][7], WOCHENTAGE);
         table.setFont(new Font("Arial", Font.PLAIN, 10));
         table.setRowHeight(60);
@@ -64,13 +78,18 @@ public class KalenderApp {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                handleTableClick(e);
+                if (admin) {
+                    handleTableClickAdmin(e);
+                } else {
+                    handleTableClick(e);
+                }
             }
         });
 
         panel.add(monatJahrLabel);
         panel.add(prevMonthButton);
         panel.add(nextMonthButton);
+        panel.add(AdminView);
         panel.add(scrollPane);
 
         frame.add(panel);
@@ -92,30 +111,212 @@ public class KalenderApp {
         updateKalenderTable();
     }
 
+    private void loginAdminView(JButton adminView) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        // Oberer Bereich: Label und Passwortfeld nebeneinander
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel infoLabel = new JLabel("Geben Sie das Passwort ein:");
+        JPasswordField passwordField = new JPasswordField(10);
+        topPanel.add(infoLabel);
+        topPanel.add(passwordField);
+
+        // Unterer Bereich: Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton loginButton = new JButton("Login");
+        JButton closeButton = new JButton("Close");
+        buttonPanel.add(loginButton);
+        buttonPanel.add(closeButton);
+
+        // Login-Logik
+        loginButton.addActionListener(event -> {
+            String password = new String(passwordField.getPassword());
+            if ("1234".equals(password)) {
+                infoLabel.setText("Login Erfolgreich");
+                admin = true;
+            } else {
+                infoLabel.setText("Login Fehlgeschlagen");
+            }
+        });
+
+        // Close-Button-Logik
+        closeButton.addActionListener(e -> popupMenu.setVisible(false));
+
+        // Panels hinzufügen
+        mainPanel.add(topPanel);
+        mainPanel.add(buttonPanel);
+        popupMenu.add(mainPanel);
+
+        // Popup-Menü anzeigen
+        popupMenu.show(adminView, adminView.getWidth() / 2, adminView.getHeight() / 2);
+    }
+
     private void handleTableClick(MouseEvent e) {
         int row = table.rowAtPoint(e.getPoint());
         int column = table.columnAtPoint(e.getPoint());
         Object value = table.getValueAt(row, column);
 
-        if (value != null && !value.toString().isEmpty()) {
-            JPopupMenu popupMenu = new JPopupMenu();
+        if (value != null && !value.toString().isEmpty() && column < 5) {
+            // Neues JDialog erstellen
+            JDialog dialog = new JDialog();
+            dialog.setTitle("Details für " + value.toString()); // Titel des Dialogs
+            dialog.setModal(true); // Modal: Benutzer kann den Hauptframe nicht interagieren, solange der Dialog
+                                   // geöffnet ist
+            dialog.setSize(400, 300); // Größe des Dialogs
+            dialog.setLocationRelativeTo(table); // Dialog erscheint in der Mitte des Fensters
+            dialog.setLayout(new BorderLayout());
 
-            JMenuItem infoItem = new JMenuItem("Information: " + value.toString());
-            popupMenu.add(infoItem);
+            // Information Panel
+            JPanel informationPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            JTextField title = new JTextField("Beschreibung", 10);
+            JTextField name = new JTextField("Name", 10);
+            informationPanel.add(new JLabel("Titel:"));
+            informationPanel.add(title);
+            informationPanel.add(new JLabel("Name:"));
+            informationPanel.add(name);
 
-            JTextField nameField = new JTextField();
-            JTextField tagField = new JTextField();
-            Object[] message = {
-                "Name:", nameField,
-                "Grund:", tagField,
-            };
+            // Button Panel
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton closeButton = new JButton("Abbrechen");
+            closeButton.addActionListener(event -> dialog.setVisible(false));
 
-            int option = JOptionPane.showConfirmDialog(null, message, "Register", JOptionPane.OK_CANCEL_OPTION);
-            if (option == JOptionPane.OK_OPTION && true) {
-                JOptionPane.showMessageDialog(table, "Termin gebucht!"); // TODO: add functionality
+            // JTable im Dialog
+
+            // Option = Zeit
+            // Details = frei / nict frei
+            String[] columnNames = { "Zeit", "Verfügbarkeit" };
+
+            ArrayList<Object[]> dataList = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                // Check ob Zeit beriets vergeben ist
+                String option = "Zeit: " + (i + 7) + " Uhr";
+                String details = "NFrei";
+
+                // Erstelle ein Objekt-Array für jede Zeile
+                Object[] dataObject = { option, details };
+
+                // Füge die Zeile zur Liste hinzu
+                dataList.add(dataObject);
             }
 
-            popupMenu.show(table, e.getX(), e.getY());
+            Object[][] data = dataList.toArray(new Object[0][0]);
+
+            JTable menuTable = new JTable(data, columnNames);
+            menuTable.setFocusable(false); // Verhindert Fokusprobleme
+            menuTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            menuTable.setRowHeight(25);
+
+            // Interaktion mit der JTable
+            menuTable.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int selectedRow = menuTable.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        String option = menuTable.getValueAt(selectedRow, 0).toString();
+                        String details = menuTable.getValueAt(selectedRow, 1).toString();
+                        if (details.equals("Frei")) {
+                            selected = option;
+                        } else {
+                            menuTable.clearSelection();
+                        }
+                        System.out.println("Selected: " + option + " - " + details);
+
+                    }
+                }
+            });
+
+            JButton actionButton = new JButton("Buchen");
+            actionButton.addActionListener(event -> {
+                String date = value.toString();
+                if (!selected.equals(null)) {
+                    Handler.addEvent(title.getText() + ":" + name.getText() + ":" + date + ":" + selected);
+                }
+                dialog.setVisible(false); // Dialog schließen nach Buchung
+            });
+
+            // JScrollPane für die JTable
+            JScrollPane scrollPane = new JScrollPane(menuTable);
+            scrollPane.setPreferredSize(new Dimension(300, 150));
+
+            buttonPanel.add(actionButton);
+            buttonPanel.add(closeButton);
+
+            // Komponenten zum Dialog hinzufügen
+            dialog.add(informationPanel, BorderLayout.NORTH);
+            dialog.add(scrollPane, BorderLayout.CENTER);
+            dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+            // Dialog anzeigen
+            dialog.setVisible(true);
+        }
+    }
+
+    private void handleTableClickAdmin(MouseEvent e) { // admin view for the selected day
+        int row = table.rowAtPoint(e.getPoint());
+        int column = table.columnAtPoint(e.getPoint());
+        Object value = table.getValueAt(row, column);
+        String[] dateValues = value.toString().split("\\.");
+        String date = "" + dateValues[0] + "-" + dateValues[1] + "-" + dateValues[2];
+        // String[] dates = Handler.addEvent(RequestCode.GET, date);
+        if (value != null && !value.toString().isEmpty() && column < 5) {
+            // Neues JDialog erstellen
+            JDialog dialog = new JDialog();
+            dialog.setTitle("Details für " + value.toString()); // Titel des Dialogs
+            dialog.setModal(true); // Modal: Benutzer kann den Hauptframe nicht interagieren, solange der Dialog
+                                   // geöffnet ist
+            dialog.setSize(400, 300); // Größe des Dialogs
+            dialog.setLocationRelativeTo(table); // Dialog erscheint in der Mitte des Fensters
+            dialog.setLayout(new BorderLayout());
+
+            // Option = Zeit
+            // Details = frei / nict frei
+            String[] columnNames = { "Zeit", "Verfügbarkeit" };
+
+            ArrayList<Object[]> dataList = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                // Check ob Zeit beriets vergeben ist
+                String option = "Zeit" + (i + 1);
+                String details = "Frei";
+
+                // Erstelle ein Objekt-Array für jede Zeile
+                Object[] dataObject = { option, details };
+
+                // Füge die Zeile zur Liste hinzu
+                dataList.add(dataObject);
+            }
+
+            Object[][] data = dataList.toArray(new Object[0][0]);
+
+            JTable menuTable = new JTable(data, columnNames);
+            menuTable.setFocusable(false); // Verhindert Fokusprobleme
+            menuTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            menuTable.setRowHeight(25);
+
+            // Interaktion mit der JTable
+            menuTable.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int selectedRow = menuTable.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        String option = menuTable.getValueAt(selectedRow, 0).toString();
+                        String details = menuTable.getValueAt(selectedRow, 1).toString();
+                        System.out.println("Selected: " + option + " - " + details);
+
+                        // Hier Aktionen ausführen, wenn eine Zeile ausgewählt wurde
+                    }
+                }
+            });
+
+            // JScrollPane für die JTable
+            JScrollPane scrollPane = new JScrollPane(menuTable);
+            scrollPane.setPreferredSize(new Dimension(300, 150));
+
+            dialog.add(scrollPane, BorderLayout.CENTER);
+
+            // Dialog anzeigen
+            dialog.setVisible(true);
         }
     }
 
@@ -151,13 +352,4 @@ public class KalenderApp {
         return (dayOfWeek + 5) % 7; // Montag als erster Tag
     }
 
-    public static void main(String[] args) {
-        try {
-            c = (args.length == 2 && args[0] != null && args[1] != null)?new Client(args[0], Integer.parseInt(args[1])):new Client();
-        } catch (NumberFormatException e) {
-            System.out.println("not a port: " + args[1]);
-            System.exit(1);
-        }
-        new KalenderApp().createKalenderUI();
-    }
 }
