@@ -4,6 +4,7 @@ import socketio.Socket;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 import mtd.tasker.protocol.Response;
 import mtd.tasker.protocol.Request;
@@ -79,13 +80,23 @@ public class Client {
     static public Response request(Request request) {
         try {
             if (!socket.connect()) throw new SocketException("Socket is closed, try opening the class again");
-            System.out.println("requesting " + request.getCode());
+            System.out.println("Requesting " + request.getCode());
+
+            // Serialize the request object
             byte[] req = Serialisation.serialize(request);
             socket.write(req, req.length);
+
+            // Prepare to read the response
             byte[] resp = new byte[1024];
-            if (socket.read(resp, socket.dataAvailable()) == -1) return null;
-            System.out.println("response in bytes: " + resp.toString());
-            return (Response) Serialisation.deserialize(resp);
+            int bytesRead = socket.read(resp, resp.length);
+
+            if (bytesRead == -1) return null; // End of stream
+
+            // Deserialize the response using the actual number of bytes read
+            Response response = (Response) Serialisation.deserialize(resp);
+            System.out.println("Response in bytes: " + Arrays.toString(resp)); // Print byte array content
+
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

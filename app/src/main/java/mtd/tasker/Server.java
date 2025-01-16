@@ -18,7 +18,7 @@ public class Server {
     public static ArrayList<Clientp> clients = new ArrayList<>();
     public static Boolean close = false;
 
-    public Server(String host, int port) {
+    public Server(String host, int port) throws InterruptedException {
         this.host = host;
         this.port = port;
         while (true) {
@@ -34,10 +34,10 @@ public class Server {
                     System.out.println("New client (" + ip + ") connected!");
                     clientThread.start();
                     clients.add(new Clientp(socket, clientThread, ip)); 
-                    socket.write("connected!\n");
                 }
             } catch (IOException e) {
                 System.out.println("creating socket at " + host + ":" + port + " failed. trying again in 5 seconds...");
+                Thread.sleep(5000);
                 continue;
             }
         }
@@ -46,12 +46,12 @@ public class Server {
     /**
      * create Client with default values
      */
-    public Server() {
+    public Server() throws InterruptedException {
         this(DEF_HOST, DEF_PORT);
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Server S;
         try {
             S = (args.length == 2 && args[0] != null && args[1] != null)? new Server(args[0], Integer.parseInt(args[1])):new Server();
@@ -74,23 +74,30 @@ class ClientThread implements Runnable {
         id = ++ID;
     }
 
+
     public void run() {
         while (running) {
             byte[] msg = new byte[1024];
             try {
+                // Check how many bytes are available to read
                 int len = socket.dataAvailable();
-                System.out.println(len);
-                //BUG: Somehow during the transission, the Request Object gets corrupted
-                if (len <= 0 && socket.read(msg,len) == -1) continue;
+                if (len > 0) {
+                    // Read the data into the byte array
+                    int bytesRead = socket.read(msg, Math.min(len, msg.length));
+                    if (bytesRead == -1) {
+                        continue; // End of stream
+                    }
+
+                    // Deserialize only the actual bytes read
+                    Request req = (Request) Serialisation.deserialize(msg);
+                    System.out.println("Command gotten: " + req.toString());
+                    handleRequest(req);
+                }
             } catch (IOException e) {
                 System.out.println("Client " + id + " disconnected!: " + e.getMessage());
                 running = false;
-            }
-            try {
-            Request req = (Request) Serialisation.deserialize(msg);
-            System.out.println("command gotten: " + req.toString());
-                handleRequest(req);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                System.out.println("An error occurred: " + e.getMessage());
                 e.printStackTrace();
             }
         }
