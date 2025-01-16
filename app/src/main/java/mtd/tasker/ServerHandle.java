@@ -19,7 +19,7 @@ public class ServerHandle {
                 str += event.toString() + ";";
             }
         }
-        return str.isEmpty()?new Response(StatusCode.NOT_FOUND):new Response(StatusCode.OK, str);
+        return str.isEmpty() ? new Response(StatusCode.NOT_FOUND) : new Response(StatusCode.OK, str);
     }
 
     public static Response getByPerson(String person) {
@@ -29,6 +29,16 @@ public class ServerHandle {
                 str += event.toString() + ";";
             }
         }
-        return str.isEmpty()?new Response(StatusCode.NOT_FOUND):new Response(StatusCode.OK, str);
+        return str.isEmpty() ? new Response(StatusCode.NOT_FOUND) : new Response(StatusCode.OK, str);
+    }
+
+    public static Response getByDate(String date) {
+        String str = "";
+        for (Event event : events) {
+            if (date.equals(event.getPerson())) {
+                str += event.toString() + ";";
+            }
+        }
+        return str.isEmpty() ? new Response(StatusCode.NOT_FOUND) : new Response(StatusCode.OK, str);
     }
 }

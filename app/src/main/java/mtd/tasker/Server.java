@@ -133,6 +133,9 @@ class ClientThread implements Runnable {
                     case "tag":
                         response = ServerHandle.getByTag(cmd[1]);
                         break;
+                    case "date":
+                        response = ServerHandle.getByDate(cmd[1]);
+                        break;
                     default:
                         response = ServerHandle.getByPerson(cmd[1]);
                         break;

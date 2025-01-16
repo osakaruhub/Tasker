@@ -159,7 +159,7 @@ public class KalenderApp {
         int column = table.columnAtPoint(e.getPoint());
         Object value = table.getValueAt(row, column);
 
-        String[] appointments = Handler.addEvent(RequestCode.GET, value.toString()); //
+        String[] appointments = Handler.addEvent(RequestCode.GET, "date;" + value.toString()); //
         // Suche alle Termine für diesen TAG
 
         if (value != null && !value.toString().isEmpty() && column < 5) {
