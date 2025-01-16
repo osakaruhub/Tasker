@@ -129,10 +129,10 @@ class ServerThread implements Runnable {
                 if (dataAvailable == 0 && s.read(msg, dataAvailable) == -1) continue;
                 Request req = (Request) Serialisation.deserialize(msg);
                 switch (req.getRequestCode()) {
-                    case RequestCode.ADD:
+                    case ADD:
                         Handler.addEvent(req.getContent());
                         break;
-                    case RequestCode.DELETE:
+                    case DELETE:
                         Handler.deleteEntry(req.getContent());
                         break;
                     default:
