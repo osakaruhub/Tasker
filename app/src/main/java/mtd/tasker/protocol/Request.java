@@ -1,7 +1,8 @@
 package mtd.tasker.protocol;
 
-import java.awt.Event;
 import java.io.Serializable;
+
+import mtd.tasker.Event;
 import mtd.tasker.protocol.InvalidCommandException;
 
 /**

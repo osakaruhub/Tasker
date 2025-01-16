@@ -115,6 +115,11 @@ public class Client {
             System.exit(1);
         }
     }
+
+    public static void main(String[] args) {
+        new KalenderApp();
+        new Client();
+    }
 }
 
 class ServerThread implements Runnable {

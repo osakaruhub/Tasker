@@ -33,7 +33,7 @@ public class Server {
                     String ip = socket.readLine();
                     System.out.println("New client (" + ip + ") connected!");
                     clientThread.start();
-                    clients.add(new Clientp(socket, clientThread, ip)); 
+                    clients.add(new Clientp(socket, clientThread, ip));
                 }
             } catch (IOException e) {
                 System.out.println("creating socket at " + host + ":" + port + " failed. trying again in 5 seconds...");
@@ -50,11 +50,12 @@ public class Server {
         this(DEF_HOST, DEF_PORT);
     }
 
-
     public static void main(String[] args) throws InterruptedException {
         Server S;
         try {
-            S = (args.length == 2 && args[0] != null && args[1] != null)? new Server(args[0], Integer.parseInt(args[1])):new Server();
+            S = (args.length == 2 && args[0] != null && args[1] != null)
+                    ? new Server(args[0], Integer.parseInt(args[1]))
+                    : new Server();
         } catch (NumberFormatException e) {
             System.out.println("not a port: " + args[1]);
             System.exit(1);
@@ -74,23 +75,22 @@ class ClientThread implements Runnable {
         id = ++ID;
     }
 
-
     public void run() {
         while (running) {
-            //byte[] msg = new byte[1024];
+            // byte[] msg = new byte[1024];
             try {
-                //    int len = socket.dataAvailable();
-                //    if (len > 0) {
-                //        int bytesRead = socket.read(msg, Math.min(len, msg.length));
-                //        if (bytesRead == -1) {
-                //            continue; // End of stream
-                //        }
-                //        Request req = (Request) Serialisation.deserialize(msg);
+                // int len = socket.dataAvailable();
+                // if (len > 0) {
+                // int bytesRead = socket.read(msg, Math.min(len, msg.length));
+                // if (bytesRead == -1) {
+                // continue; // End of stream
+                // }
+                // Request req = (Request) Serialisation.deserialize(msg);
                 String[] msg = socket.readLine().trim().split(" ");
                 Request req = new Request(RequestCode.fromCode(msg[0]), msg[2]);
                 System.out.println("Command gotten: " + req.toString());
                 handleRequest(req);
-                //}
+                // }
             } catch (IOException e) {
                 System.out.println("Client " + id + " disconnected!: " + e.getMessage());
                 running = false;
@@ -106,76 +106,80 @@ class ClientThread implements Runnable {
         // TODO: Handle Client Requests
         Response response = null;
         switch (request.getRequestCode()) {
-            case RequestCode.ADD:
+            case ADD:
                 // NOTE: change this when changing to a database
-                response = addEvent(request.getContent())?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR);
-            break;
-            case RequestCode.DELETE:
+                response = addEvent(request.getContent()) ? new Response(StatusCode.OK)
+                        : new Response(StatusCode.SERVER_ERROR);
+                break;
+            case DELETE:
                 // NOTE: change this when changing to a database
                 try {
                     response = remove(request.getContent());
-                } catch (NumberFormatException e) {response = new Response(StatusCode.NOT_FOUND);}
-            break;
-            case RequestCode.SYNC:
-                response = sync()?new Response(StatusCode.OK):new Response(StatusCode.SERVER_ERROR);
+                } catch (NumberFormatException e) {
+                    response = new Response(StatusCode.NOT_FOUND);
+                }
                 break;
-            case RequestCode.GET:
+            case SYNC:
+                response = sync() ? new Response(StatusCode.OK) : new Response(StatusCode.SERVER_ERROR);
+                break;
+            case GET:
                 String msg = request.getContent();
                 String cmd[] = msg.split(";");
                 // NOTE: change this when changing to a database
                 switch (cmd[0]) {
                     case "person":
                         response = ServerHandle.getByPerson(cmd[1]);
-                    break;
+                        break;
                     case "tag":
                         response = ServerHandle.getByTag(cmd[1]);
-                    break;
+                        break;
                     default:
                         response = ServerHandle.getByPerson(cmd[1]);
-                    break;
+                        break;
                 }
-            break;
-            case RequestCode.SU:
+                break;
+            case SU:
                 if (ServerHandle.su(request.getContent())) {
                     response = new Response(StatusCode.OK);
                     admin = true;
                 } else {
                     response = new Response(StatusCode.PERMISSION_ERROR);
                 }
-            break;
-            case RequestCode.LIST:
-            // NOTE: change this when changing to a database
-                    response = admin?new Response(StatusCode.OK, listClients()):
-                                new Response(StatusCode.PERMISSION_ERROR);
-                    //socket.write(response, response.length);
-                    //socket.write(response, response.length);
-            break;
-            case RequestCode.KICK:
+                break;
+            case LIST:
+                // NOTE: change this when changing to a database
+                response = admin ? new Response(StatusCode.OK, listClients())
+                        : new Response(StatusCode.PERMISSION_ERROR);
+                // socket.write(response, response.length);
+                // socket.write(response, response.length);
+                break;
+            case KICK:
                 if (admin) {
                     try {
                         if (kick(Integer.parseInt(request.getContent()))) {
-                        response = new Response(StatusCode.OK, listClients());
-                        } else {}
+                            response = new Response(StatusCode.OK, listClients());
+                        } else {
+                        }
                     } catch (Exception e) {
-                    response = new Response(StatusCode.PERMISSION_ERROR);
+                        response = new Response(StatusCode.PERMISSION_ERROR);
                     }
                 }
-            break;
-            case RequestCode.EXIT:
+                break;
+            case EXIT:
                 socket.close();
                 running = false;
-            break;
-            case RequestCode.CLOSE:
+                break;
+            case CLOSE:
                 if (!admin) {
                     response = new Response(StatusCode.PERMISSION_ERROR);
                 } else {
-                multicast(new Request(RequestCode.EXIT));
-                close();
-            }
-            break;
+                    multicast(new Request(RequestCode.EXIT));
+                    close();
+                }
+                break;
             default:
                 response = new Response(StatusCode.BAD_REQUEST);
-            break;
+                break;
         }
         socket.write(response.toString());
     }
@@ -217,12 +221,12 @@ class ClientThread implements Runnable {
     private void multicast(Request req) {
         byte[] request = null;
         try {
-        request = Serialisation.serialize(req);
+            request = Serialisation.serialize(req);
         } catch (Exception e) {
         }
         for (Clientp client : Server.clients) {
             try {
-            client.getSocket().write(request, request.length);
+                client.getSocket().write(request, request.length);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("couldnt send to client: " + client.id);
@@ -236,7 +240,7 @@ class ClientThread implements Runnable {
             str += cli.toString();
         }
         return str;
-    } 
+    }
 
     private void close() {
         try {
