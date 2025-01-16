@@ -11,6 +11,7 @@ import java.io.IOException;
 public class Serialisation {
     /**
  * serialize an object for sending.
+ * NOTE: it is not used for any classes, as im too dumb how to send Bytes.
  *
  * @param object the Object to be serialized
  * @return byte[] the Serialized version 

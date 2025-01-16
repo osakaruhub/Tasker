@@ -20,6 +20,12 @@ public enum StatusCode {
         return this.code + " " + this.msg;
     }
 
+    /**
+     * finds the StatusCode from a given String.
+     *
+     * @param code 
+     * @throws InvalidCommandException(code)
+     */
     static public StatusCode fromCode(String code) {
         for (StatusCode stat : StatusCode.values()) {
             if (stat.getCode().equals(code)) {

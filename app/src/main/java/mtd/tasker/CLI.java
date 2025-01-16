@@ -46,7 +46,7 @@ public class CLI {
             if (com.length != 2)
                 continue;
             try {
-                Response resp = c.request(new Request(RequestCode.fromCode(com[0]), com[1]));
+                Response resp = com.length==2?c.request(new Request(RequestCode.fromCode(com[0]), com[1])):c.request(new Request(RequestCode.fromCode(com[0]), ""));
                 System.out.println(resp.toString());
             } catch (InvalidCommandException e) {
                 e.printStackTrace();

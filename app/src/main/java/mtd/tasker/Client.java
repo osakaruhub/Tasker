@@ -78,8 +78,6 @@ public class Client {
      */
     static public Response request(Request request) {
         try {
-            if (!socket.connect())
-                throw new SocketException("Socket is closed, try opening the class again");
             System.out.println("Requesting " + request.getCode());
 
             // byte[] req = Serialisation.serialize(request);
@@ -132,12 +130,9 @@ class ServerThread implements Runnable {
     public void run() {
         while (true) {
             try {
-                int dataAvailable = s.dataAvailable();
-                byte[] msg = null;
-                if (dataAvailable == 0 && s.read(msg, dataAvailable) == -1)
-                    continue;
-                Request req = (Request) Serialisation.deserialize(msg);
-                switch (req.getRequestCode()) {
+                String[] msg = s.readLine().trim().split(" ");
+                Request request = new Request(RequestCode.fromCode(msg[0]), msg[1]);
+                switch (request.getRequestCode()) {
                     case ADD:
                         // Handler.addEvent(req.getContent());
                         break;

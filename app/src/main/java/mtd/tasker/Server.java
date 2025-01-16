@@ -24,21 +24,23 @@ public class Server {
         while (true) {
             try {
                 sSocket = new ServerSocket(this.port);
-                System.out.println("starting server at " + this.host + ":" + this.port);
-                System.out.println("listening for clients...");
-                new Thread(new HeartbeatChecker()).start();
-                while (!close) {
+            } catch (IOException e) {
+                System.out.println("creating socket at " + host + ":" + port + " failed. trying again in 5 seconds...");
+                Thread.sleep(5000);
+                continue;
+            }
+            System.out.println("starting server at " + this.host + ":" + this.port);
+            System.out.println("listening for clients...");
+            new Thread(new HeartbeatChecker()).start();
+            while (!close) {
+                try {
                     Socket socket = sSocket.accept();
                     Thread clientThread = new Thread(new ClientThread(socket));
                     String ip = socket.readLine();
                     System.out.println("New client (" + ip + ") connected!");
                     clientThread.start();
                     clients.add(new Clientp(socket, clientThread, ip));
-                }
-            } catch (IOException e) {
-                System.out.println("creating socket at " + host + ":" + port + " failed. trying again in 5 seconds...");
-                Thread.sleep(5000);
-                continue;
+                } catch (IOException e) {}
             }
         }
     }
@@ -91,12 +93,10 @@ class ClientThread implements Runnable {
                 System.out.println("Command gotten: " + req.toString());
                 handleRequest(req);
                 // }
-            } catch (IOException e) {
-                System.out.println("Client " + id + " disconnected!: " + e.getMessage());
+            } catch (IOException | NullPointerException e) {
                 running = false;
             } catch (Exception e) {
                 System.out.println("An error occurred: " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
@@ -180,6 +180,9 @@ class ClientThread implements Runnable {
                     close();
                 }
                 break;
+            case TEST:
+                    response = new Response(StatusCode.OK, "Rust rocks!");
+                break;
             default:
                 response = new Response(StatusCode.BAD_REQUEST);
                 break;
@@ -222,14 +225,9 @@ class ClientThread implements Runnable {
     }
 
     private void multicast(Request req) {
-        byte[] request = null;
-        try {
-            request = Serialisation.serialize(req);
-        } catch (Exception e) {
-        }
         for (Clientp client : Server.clients) {
             try {
-                client.getSocket().write(request, request.length);
+                client.getSocket().write(req.toString());
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("couldnt send to client: " + client.id);

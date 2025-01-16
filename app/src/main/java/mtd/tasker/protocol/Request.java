@@ -1,7 +1,5 @@
 package mtd.tasker.protocol;
 
-import java.io.Serializable;
-
 import mtd.tasker.Event;
 import mtd.tasker.protocol.InvalidCommandException;
 
@@ -10,9 +8,9 @@ import mtd.tasker.protocol.InvalidCommandException;
  * content.
  *
  */
-public class Request implements Serializable {
+public class Request{
 
-    private static final long serialVersionUID = 1L; // Recommended for Serializable classes
+    //private static final long serialVersionUID = 1L; // Recommended for Serializable classes
     private RequestCode code;
     private String content;
 
@@ -50,7 +48,7 @@ public class Request implements Serializable {
     }
 
     /*
-     * gets the StatusCode for the Response
+     * gets the StatusCode for the Response (String)
      * 
      * @return code the StatusCode
      */
@@ -58,10 +56,20 @@ public class Request implements Serializable {
         return this.code.toString();
     }
 
+    /*
+     * gets the StatusCode for the Response
+     * 
+     * @return code the StatusCode
+     */
     public RequestCode getRequestCode() {
         return this.code;
     }
 
+    /*
+     * prints a summary of the Request: "code content".
+     * 
+     * @return code the StatusCode
+     */
     @Override
     public String toString() {
         return code + " " + content;
