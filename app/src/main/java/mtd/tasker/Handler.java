@@ -16,8 +16,8 @@ import java.util.ArrayList;
  *
  */
 public class Handler {
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd,MM,yy,HH,mm");
-    static private ArrayList<Event> entries;
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+    static private ArrayList<Event> entries = new ArrayList<>();
     static private List<String> tags;
     private static final int OK = 0;
 
@@ -56,13 +56,29 @@ public class Handler {
     
     // primarly used for manual add (via cli or Serverrequest)
     static public Boolean addEvent(String content) throws NumberFormatException {
+        Event entrie;
+        System.out.println(content);
         String[] field = content.split(":");
         try {
-            entries.add(new Event(field[1], field[2], field[3]));
+            entrie = new Event(field[0], field[1], field[2], field[3]);
+            entries.add(entrie);
         } catch (ParseException e) {
+            System.out.println(e.getMessage());
             return false;
         }
+        if (entries != null) {
+            Request request = new Request(RequestCode.ADD, entrie);
+            System.out.println(request.getRequestCode());
+            Client.request(request);
+        }
         return true;
+
+    }
+
+    static public String[] addEvent(RequestCode requestCode, String content) {
+        Request request = new Request(requestCode, content);
+        Response response = Client.request(request);
+        return response.getContent().split(":");
     }
 
     static public int addEvent(Event e) {
@@ -120,4 +136,9 @@ public class Handler {
         }
         //TODO: sync method
     }
+    static public String availableTime(String date) {
+        Request request = new Request(RequestCode.GET, date);
+        return Client.request(request).getContent();
+    }
+}
 }
