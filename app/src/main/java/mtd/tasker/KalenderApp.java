@@ -229,9 +229,9 @@ public class KalenderApp {
 
             JButton actionButton = new JButton("Buchen");
             actionButton.addActionListener(event -> {
-                String date = value.toString();
+                String date = value.toString() + "-" + selected + "-00";
                 if (!selected.equals(null)) {
-                    Handler.addEvent(title.getText() + ":" + name.getText() + ":" + date + ":" + selected);
+                    Handler.addEvent(title.getText() + ":" + name.getText() + ":" + date);
                 }
                 dialog.setVisible(false); // Dialog schließen nach Buchung
             });

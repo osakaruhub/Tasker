@@ -16,7 +16,7 @@ import java.util.ArrayList;
  *
  */
 public class Handler {
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm");
     static private ArrayList<Event> entries = new ArrayList<>();
     static private List<String> tags;
     private static final int OK = 0;
@@ -53,14 +53,14 @@ public class Handler {
         }
         return true;
     }
-    
+
     // primarly used for manual add (via cli or Serverrequest)
     static public Boolean addEvent(String content) throws NumberFormatException {
         Event entrie;
         System.out.println(content);
         String[] field = content.split(":");
         try {
-            entrie = new Event(field[0], field[1], field[2], field[3]);
+            entrie = new Event(field[0], field[1], field[2]);
             entries.add(entrie);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
@@ -91,16 +91,17 @@ public class Handler {
         return Integer.parseInt(response.getCode());
     }
 
-
-    //static public int addEvent(String title, String person, Date date, String tag) {
-    //    Request request = new Request(RequestCode.ADD, new Event(title, person, date, tag).toString());
-    //    Response response = Client.request(request);
-    //    if (response.getCode() == StatusCode.OK.toString()) {
-    //        entries.add(new Event(title, person, date, tag));
-    //        return OK;
-    //    }
-    //    return Integer.parseInt(response.getCode());
-    //}
+    // static public int addEvent(String title, String person, Date date, String
+    // tag) {
+    // Request request = new Request(RequestCode.ADD, new Event(title, person, date,
+    // tag).toString());
+    // Response response = Client.request(request);
+    // if (response.getCode() == StatusCode.OK.toString()) {
+    // entries.add(new Event(title, person, date, tag));
+    // return OK;
+    // }
+    // return Integer.parseInt(response.getCode());
+    // }
 
     static public List<String> getTags() {
         return Handler.tags;
@@ -109,22 +110,21 @@ public class Handler {
     static public String getTagsString() {
         String str = "";
         int i = 0;
-        for (;i<tags.size();i++) {
+        for (; i < tags.size(); i++) {
             str += i + " - " + tags.get(i) + "\n";
         }
-        str += (i+1) + " - custom";
+        str += (i + 1) + " - custom";
         return str;
     }
 
     // delete an Entry locally and from the Server.
     static public Boolean deleteEntry(String uid) {
-        return entries.removeIf(entry -> 
-            entry.getID().equals(uid) && 
-            Client.request(new Request(RequestCode.DELETE, uid)).getStatusCode() == StatusCode.OK
-        );
+        return entries.removeIf(entry -> entry.getID().equals(uid) &&
+                Client.request(new Request(RequestCode.DELETE, uid)).getStatusCode() == StatusCode.OK);
     }
 
-    // remove it only locally. useful when the Server requests for a deletion of an Event.
+    // remove it only locally. useful when the Server requests for a deletion of an
+    // Event.
     static public Boolean removeEntry(String uid) {
         return entries.removeIf(entry -> entry.getID().equals(uid));
     }
@@ -134,11 +134,11 @@ public class Handler {
         if (response.getStatusCode() == StatusCode.OK) {
 
         }
-        //TODO: sync method
+        // TODO: sync method
     }
+
     static public String availableTime(String date) {
         Request request = new Request(RequestCode.GET, date);
         return Client.request(request).getContent();
     }
-}
 }
