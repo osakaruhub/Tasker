@@ -366,5 +366,6 @@ public class KalenderApp {
             System.out.println("not a port: " + args[1]);
             System.exit(1);
         }
+        new KalenderApp();
     }
 }
