@@ -3,6 +3,7 @@ package mtd.tasker;
 import socketio.ServerSocket;
 import socketio.Socket;
 import java.io.IOException;
+import java.net.SocketException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
@@ -93,10 +94,12 @@ class ClientThread implements Runnable {
                 System.out.println("Command gotten: " + req.toString());
                 handleRequest(req);
                 // }
-            } catch (IOException | NullPointerException e) {
+            } catch (NullPointerException | SocketException e) {
+                System.out.printf("Client (%s) disconnected!");
                 running = false;
             } catch (Exception e) {
-                System.out.println("An error occurred: " + e.getMessage());
+                e.printStackTrace();
+                System.exit(1);
             }
         }
     }
@@ -195,9 +198,9 @@ class ClientThread implements Runnable {
     }
 
     private Boolean addEvent(String content) {
-        String[] event = content.split(":");
+        String[] field = content.split(":");
         try {
-            EventHandler.addEvent(new Event(event[0], event[1], event[2]));
+            EventHandler.addEvent(new EventBuilder().withDate(field[0]).withPerson(field[1]).withTag(field[2]).build());
         } catch (ParseException e) {
             return false;
         }

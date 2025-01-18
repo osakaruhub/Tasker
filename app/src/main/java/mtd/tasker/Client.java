@@ -33,16 +33,13 @@ public class Client {
         this.host = host;
         this.port = port;
         connect();
-        Thread c = new Thread(new ServerThread(socket));
-        c.setDaemon(true);
-        c.start();
     }
 
     public void connect() {
         do {
             try {
                 socket = new Socket(host, port);
-                while (!verbinden()) {
+                while (!socket.connect()) {
                     System.out.println(
                             "couldnt connect to " + this.host + ":" + this.port + "\ntrying again in 5 seconds...");
                     try {
@@ -64,10 +61,6 @@ public class Client {
             socket.write(InetAddress.getLocalHost().getHostAddress() + "\n");
         } catch (Exception e) {
         }
-    }
-
-    public Boolean verbinden() {
-        return socket.connect();
     }
 
     /**
@@ -117,35 +110,5 @@ public class Client {
     public static void main(String[] args) {
         new KalenderApp();
         new Client();
-    }
-}
-
-class ServerThread implements Runnable {
-    Socket s;
-
-    public ServerThread(Socket s) {
-        this.s = s;
-    }
-
-    public void run() {
-        while (true) {
-            try {
-                String[] msg = s.readLine().trim().split(" ");
-                Request request = new Request(RequestCode.fromCode(msg[0]), msg[1]);
-                switch (request.getRequestCode()) {
-                    case ADD:
-                        // Handler.addEvent(req.getContent());
-                        break;
-                    case DELETE:
-                        // Handler.deleteEntry(req.getContent());
-                        break;
-                    default:
-                        break;
-                }
-
-            } catch (Exception e) {
-                continue;
-            }
-        }
     }
 }

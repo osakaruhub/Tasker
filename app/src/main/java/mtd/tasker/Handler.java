@@ -1,9 +1,6 @@
 package mtd.tasker;
 
-import mtd.tasker.protocol.Request;
-import mtd.tasker.protocol.RequestCode;
-import mtd.tasker.protocol.StatusCode;
-import mtd.tasker.protocol.Response;
+import mtd.tasker.protocol.*;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +15,6 @@ import java.util.ArrayList;
 public class Handler {
     public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy.HH.mm");
     static private ArrayList<Event> entries = new ArrayList<>();
-    static private List<String> tags;
     private static final int OK = 0;
 
     // NOTE: add tags or entries here
@@ -54,25 +50,20 @@ public class Handler {
         return true;
     }
 
+    // -1 - Event format invalid
     // primarly used for manual add (via cli or Serverrequest)
-    static public Boolean addEvent(String content) throws NumberFormatException {
-        Event entrie;
-        System.out.println(content);
+    static public int addEvent(String content) {
         String[] field = content.split(":");
+        if (field.length != 3) {
+            return -1;
+        }
         try {
-            entrie = new Event(field[0], field[1], field[2]);
-            entries.add(entrie);
+            Event entry = new EventBuilder().withDate(field[0]).withPerson(field[1]).withTag(field[2]).build();
+            return addEvent(entry);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            return false;
+            return -1;
         }
-        if (entries != null) {
-            Request request = new Request(RequestCode.ADD, entrie);
-            System.out.println(request.getRequestCode());
-            Client.request(request);
-        }
-        return true;
-
     }
 
     static public String[] addEvent(RequestCode requestCode, String content) {
@@ -82,7 +73,7 @@ public class Handler {
     }
 
     static public int addEvent(Event e) {
-        Request request = new Request(RequestCode.ADD, e.toString());
+        Request request = new Request(RequestCode.ADD, e);
         Response response = Client.request(request);
         if (response.getCode() == StatusCode.OK.toString()) {
             entries.add(e);
@@ -102,20 +93,16 @@ public class Handler {
     // }
     // return Integer.parseInt(response.getCode());
     // }
-
-    static public List<String> getTags() {
-        return Handler.tags;
-    }
-
-    static public String getTagsString() {
-        String str = "";
-        int i = 0;
-        for (; i < tags.size(); i++) {
-            str += i + " - " + tags.get(i) + "\n";
-        }
-        str += (i + 1) + " - custom";
-        return str;
-    }
+    //
+    //static public String getTagsString() {
+    //    String str = "";
+    //    int i = 0;
+    //    for (; i < tags.size(); i++) {
+    //        str += i + " - " + tags.get(i) + "\n";
+    //    }
+    //    str += (i + 1) + " - custom";
+    //    return str;
+    //}
 
     // delete an Entry locally and from the Server.
     static public Boolean deleteEntry(String uid) {
@@ -129,7 +116,7 @@ public class Handler {
         return entries.removeIf(entry -> entry.getID().equals(uid));
     }
 
-    static public void sync() {
+    static public void sync(Date date) {
         Response response = Client.request(new Request(RequestCode.SYNC));
         if (response.getStatusCode() == StatusCode.OK) {
 
@@ -138,7 +125,7 @@ public class Handler {
     }
 
     static public String availableTime(String date) {
-        Request request = new Request(RequestCode.GET, date);
+        Request request = new Request(RequestCode.GET, "date;" + date);
         return Client.request(request).getContent();
     }
 }

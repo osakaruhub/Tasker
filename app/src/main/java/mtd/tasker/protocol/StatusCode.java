@@ -5,7 +5,8 @@ public enum StatusCode {
     NOT_FOUND("404", "Not Found"),
     SERVER_ERROR("500", "Internal Server Error"),
     BAD_REQUEST("400", "Bad Request"),
-    PERMISSION_ERROR("666", "couldnt get PERMISSION_ERROR");
+    PERMISSION_ERROR("666", "Invalid permission"),
+    UNKNOWN("000", "unknown error");
 
     private final String code;
     private final String msg;
