@@ -89,7 +89,7 @@ class ClientThread implements Runnable {
                 // }
                 // Request req = (Request) Serialisation.deserialize(msg);
                 String[] msg = socket.readLine().trim().split(" ");
-                Request req = new Request(RequestCode.fromCode(msg[0]), msg[2]);
+                Request req = new Request(RequestCode.fromCode(msg[0]), msg[1]);
                 System.out.println("Command gotten: " + req.toString());
                 handleRequest(req);
                 // }

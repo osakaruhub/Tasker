@@ -4,6 +4,8 @@ skinparam Shadowing false
 
 actor User as U
 participant Client as C
+participant Client as C
+participant Client as C
 participant Server as S
 participant Login as auth
 participant Handler as H
@@ -11,14 +13,12 @@ participant GUI as G
 database db
 
 U --> G: input for events
-C -> auth: Authentication Request (login())
-auth -> S: formatted Authentication Request (login())
+C -> : Authentication Request (login())
 S -> db: authenticate user
-db --> S: retrieve Calendars
+db --> S: retrieve events
 C <-- S: retrieve Latest Calendars
 H <-- S: format Events
 C ->> S: request sync
-C ->> S: request saving current Calendar to Server
 C <<- C: close connection
 S ->> S: kick connection
 S ->> S: listen for commands

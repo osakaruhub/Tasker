@@ -138,6 +138,7 @@ package Client-Side <<Frame>> {
         - {static} currentDate : Calendar
         - table : JTable
         + clearTimeFields(calendar : Calendar)
+        + loginAdminView()
         + KalenderApp()
         + createKalenderUI() : void
         + updateKalenderTable() : void

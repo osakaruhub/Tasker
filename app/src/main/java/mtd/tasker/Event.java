@@ -91,7 +91,7 @@ public class Event {
     }
 
     public Date getDate() {
-        return date;
+        return ;
     }
 
     public Instant getTimeAdded() {

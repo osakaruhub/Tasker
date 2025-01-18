@@ -262,7 +262,7 @@ public class KalenderApp {
         int row = table.rowAtPoint(e.getPoint());
         int column = table.columnAtPoint(e.getPoint());
         Object value = table.getValueAt(row, column);
-        String[] appointments = Handler.addEvent(RequestCode.GET, value.toString());
+        String[] appointments = Handler.addEvent(RequestCode.GET, "date;" + value.toString());
         // String[] dates = Handler.addEvent(RequestCode.GET, date);
         if (value != null && !value.toString().isEmpty() && column < 5) {
             // Neues JDialog erstellen

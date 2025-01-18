@@ -38,6 +38,8 @@ public class CLI {
         System.out.println("conntected! (exit with \'" + stopMessage + "\')\n");
         String msg = "";
         do {
+            // send user input and receive in form of a Response.
+            // The input can be either just the code or also a content.
             msg = sc.nextLine().trim();
             // int spaceIndex = msg.indexOf(' ');
             if (msg.isBlank())
